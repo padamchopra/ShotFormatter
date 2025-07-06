@@ -603,7 +603,7 @@
       exportCanvas.width = exportCanvasWidth;
       exportCanvas.height = exportCanvasHeight;
       
-      const stream = exportCanvas.captureStream(60); // 60 FPS for smoother export
+      const stream = exportCanvas.captureStream(30); // 30 FPS for smoother export
       
       // Try to use higher quality codec if available
       let mimeType = 'video/webm;codecs=vp9';
@@ -713,7 +713,7 @@
       mediaRecorder.start();
       
       // Render frames for export with progress tracking
-      const frameInterval = 1000 / 60; // 60 FPS
+      const frameInterval = 1000 / 30; // 30 FPS for smoother export
       const duration = currentVideo.duration * 1000;
       let currentTime = 0;
       const startTime = Date.now();
@@ -752,10 +752,11 @@
           timeRemaining.textContent = `${minutes}m ${seconds}s remaining`;
         }
         
+        // Set video time and render frame
         currentVideo.currentTime = currentTime / 1000;
         renderExportFrame();
         currentTime += frameInterval;
-      }, frameInterval);
+      }, frameInterval + 5); // Add small delay to prevent overwhelming
     }
     
     // WebM Export button
