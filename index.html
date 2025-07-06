@@ -550,7 +550,7 @@
       return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
     }
     
-    // Direct MP4 Export functionality
+    // Direct MP4 Export functionality - Improved real-time recording approach
     function startDirectMp4Export() {
       if (!currentVideo || !currentCanvas) return;
       
@@ -566,7 +566,7 @@
       document.getElementById('progressBar').style.width = '0%';
       document.getElementById('progressText').textContent = '0%';
       
-      // Create a high-quality export canvas
+      // Create a dedicated export canvas with proper dimensions
       const exportCanvas = document.createElement('canvas');
       const exportCtx = exportCanvas.getContext('2d');
       
@@ -604,27 +604,11 @@
       exportCanvas.width = exportCanvasWidth;
       exportCanvas.height = exportCanvasHeight;
       
-      const stream = exportCanvas.captureStream(30); // 30 FPS for smoother export
-      
-      // Try to use MP4 codec if available
-      let mimeType = 'video/mp4';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/mp4;codecs=h264';
-      }
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm;codecs=h264';
-      }
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        // Fallback to WebM if MP4 is not supported
-        mimeType = 'video/webm;codecs=vp9';
-      }
-      
-      mediaRecorder = new MediaRecorder(stream, {
-        mimeType: mimeType,
-        videoBitsPerSecond: 2000000 // 2 Mbps for good quality with smaller file size
-      });
-      
-      recordedChunks = []; // Reset chunks for new export
+      // Create a dedicated export video element
+      const exportVideo = document.createElement('video');
+      exportVideo.src = currentVideo.src;
+      exportVideo.muted = true;
+      exportVideo.playsInline = true;
       
       // Function to render frame to export canvas
       function renderExportFrame() {
@@ -643,8 +627,8 @@
         const radiusValue = parseInt(cornerRadius.value);
 
         // Calculate video position to center it in the export frame
-        const videoX = (exportCanvas.width - currentVideo.videoWidth) / 2;
-        const videoY = (exportCanvas.height - currentVideo.videoHeight) / 2;
+        const videoX = (exportCanvas.width - exportVideo.videoWidth) / 2;
+        const videoY = (exportCanvas.height - exportVideo.videoHeight) / 2;
 
         // Clear export canvas with background color
         exportCtx.fillStyle = bg;
@@ -660,10 +644,10 @@
         // Draw rounded rectangle for shadow
         if (radiusValue > 0) {
           exportCtx.beginPath();
-          exportCtx.roundRect(videoX, videoY, currentVideo.videoWidth, currentVideo.videoHeight, radiusValue);
+          exportCtx.roundRect(videoX, videoY, exportVideo.videoWidth, exportVideo.videoHeight, radiusValue);
           exportCtx.fill();
         } else {
-          exportCtx.drawImage(currentVideo, videoX, videoY);
+          exportCtx.drawImage(exportVideo, videoX, videoY);
         }
         exportCtx.restore();
 
@@ -671,109 +655,144 @@
         if (radiusValue > 0) {
           exportCtx.save();
           exportCtx.beginPath();
-          exportCtx.roundRect(videoX, videoY, currentVideo.videoWidth, currentVideo.videoHeight, radiusValue);
+          exportCtx.roundRect(videoX, videoY, exportVideo.videoWidth, exportVideo.videoHeight, radiusValue);
           exportCtx.clip();
-          exportCtx.drawImage(currentVideo, videoX, videoY);
+          exportCtx.drawImage(exportVideo, videoX, videoY);
           exportCtx.restore();
         } else {
-          exportCtx.drawImage(currentVideo, videoX, videoY);
+          exportCtx.drawImage(exportVideo, videoX, videoY);
         }
       }
       
-      mediaRecorder.ondataavailable = function(event) {
-        if (event.data.size > 0) {
-          recordedChunks.push(event.data);
+      // Set up the export render loop
+      let exportAnimationFrame = null;
+      function exportRenderLoop() {
+        renderExportFrame();
+        exportAnimationFrame = requestAnimationFrame(exportRenderLoop);
+      }
+      
+      // Start recording when video is ready
+      exportVideo.onloadeddata = function() {
+        // Set up MediaRecorder with the export canvas stream
+        const stream = exportCanvas.captureStream(30); // 30 FPS for smooth export
+        
+        // Try to use MP4 codec if available
+        let mimeType = 'video/mp4';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/mp4;codecs=h264';
         }
-      };
-      
-      mediaRecorder.onstop = function() {
-        const fileExtension = mimeType.includes('mp4') ? 'mp4' : 'webm';
-        const blob = new Blob(recordedChunks, { type: mimeType });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm;codecs=h264';
+        }
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          // Fallback to WebM if MP4 is not supported
+          mimeType = 'video/webm;codecs=vp9';
+        }
         
-        // Get original filename and create new filename
-        const fileNameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
-        const newFileName = `Shot Formatted ${fileNameWithoutExt}.${fileExtension}`;
-        a.download = newFileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+        mediaRecorder = new MediaRecorder(stream, {
+          mimeType: mimeType,
+          videoBitsPerSecond: 3000000 // 3 Mbps for better quality
+        });
         
-        // Hide progress bar and show buttons
-        exportProgress.classList.add('hidden');
-        exportMp4DirectBtn.style.display = 'inline-block';
-        exportBtn.style.display = 'inline-block';
-        exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
-      };
-      
-      // Reset video to beginning and wait for seek completion
-      currentVideo.currentTime = 0;
-      currentVideo.pause();
-      
-      // Wait for video to seek to beginning, then start recording
-      currentVideo.onseeked = function() {
-        // Start recording
+        recordedChunks = []; // Reset chunks for new export
+        
+        mediaRecorder.ondataavailable = function(event) {
+          if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        };
+        
+        mediaRecorder.onstop = function() {
+          // Stop the export render loop
+          if (exportAnimationFrame) {
+            cancelAnimationFrame(exportAnimationFrame);
+          }
+          
+          const fileExtension = mimeType.includes('mp4') ? 'mp4' : 'webm';
+          const blob = new Blob(recordedChunks, { type: mimeType });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          
+          // Get original filename and create new filename
+          const fileNameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
+          const newFileName = `Shot Formatted ${fileNameWithoutExt}.${fileExtension}`;
+          a.download = newFileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          // Hide progress bar and show buttons
+          exportProgress.classList.add('hidden');
+          exportMp4DirectBtn.style.display = 'inline-block';
+          exportBtn.style.display = 'inline-block';
+          exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
+        };
+        
+        // Start recording and playing
         mediaRecorder.start();
+        exportVideo.currentTime = 0;
+        exportVideo.play();
         
-        // Render frames for export with progress tracking
-        const frameInterval = 1000 / 30; // 30 FPS
-        const duration = currentVideo.duration * 1000;
-        let currentTime = 0;
-        const startTime = Date.now();
+        // Start the export render loop
+        exportRenderLoop();
         
+        // Set up progress tracking
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
         const timeRemaining = document.getElementById('timeRemaining');
+        const startTime = Date.now();
         
-        const exportInterval = setInterval(() => {
-        if (currentTime >= duration) {
-          clearInterval(exportInterval);
-          mediaRecorder.stop();
-          return;
+        function updateProgress() {
+          if (exportVideo.ended) {
+            mediaRecorder.stop();
+            return;
+          }
+          
+          const progress = (exportVideo.currentTime / exportVideo.duration) * 100;
+          progressBar.style.width = progress + '%';
+          progressText.textContent = Math.round(progress) + '%';
+          
+          // Calculate time remaining
+          const elapsed = Date.now() - startTime;
+          const estimatedTotal = elapsed / (progress / 100);
+          const remaining = estimatedTotal - elapsed;
+          
+          if (remaining > 0 && progress > 0) {
+            const minutes = Math.floor(remaining / 60000);
+            const seconds = Math.floor((remaining % 60000) / 1000);
+            timeRemaining.textContent = `${minutes}m ${seconds}s remaining`;
+          }
+          
+          // Continue updating progress
+          requestAnimationFrame(updateProgress);
         }
         
-        // Update progress based on export currentTime
-        const videoProgress = (currentTime / duration) * 100;
-        progressBar.style.width = videoProgress + '%';
-        progressText.textContent = Math.round(videoProgress) + '%';
-        
-        // Calculate time remaining
-        const elapsed = Date.now() - startTime;
-        const estimatedTotal = elapsed / (videoProgress / 100);
-        const remaining = estimatedTotal - elapsed;
-        
-        if (remaining > 0 && videoProgress > 0) {
-          const minutes = Math.floor(remaining / 60000);
-          const seconds = Math.floor((remaining % 60000) / 1000);
-          timeRemaining.textContent = `${minutes}m ${seconds}s remaining`;
-        }
-        
-        // Set video time and render frame
-        currentVideo.currentTime = currentTime / 1000;
-        renderExportFrame();
-        currentTime += frameInterval;
-      }, frameInterval + 5); // Add small delay to prevent overwhelming
-        };
+        updateProgress();
+      };
+      
+      // Load the export video
+      exportVideo.load();
     }
     
-    // Export functionality
+    // Export functionality - Improved real-time recording approach
     function startExport(isMp4Export = false) {
       if (!currentVideo || !currentCanvas) return;
       
       // Show progress bar and hide buttons
       const exportProgress = document.getElementById('exportProgress');
       const exportBtn = document.getElementById('exportBtn');
+      const exportMp4DirectBtn = document.getElementById('exportMp4DirectBtn');
       exportProgress.classList.remove('hidden');
       exportBtn.style.display = 'none';
+      exportMp4DirectBtn.style.display = 'none';
       
       // Reset progress bar to 0%
       document.getElementById('progressBar').style.width = '0%';
       document.getElementById('progressText').textContent = '0%';
       
-      // Create a high-quality export canvas
+      // Create a dedicated export canvas with proper dimensions
       const exportCanvas = document.createElement('canvas');
       const exportCtx = exportCanvas.getContext('2d');
       
@@ -811,23 +830,11 @@
       exportCanvas.width = exportCanvasWidth;
       exportCanvas.height = exportCanvasHeight;
       
-      const stream = exportCanvas.captureStream(30); // 30 FPS for smoother export
-      
-      // Try to use higher quality codec if available
-      let mimeType = 'video/webm;codecs=vp9';
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm;codecs=vp8';
-      }
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'video/webm';
-      }
-      
-      mediaRecorder = new MediaRecorder(stream, {
-        mimeType: mimeType,
-        videoBitsPerSecond: 2000000 // 2 Mbps for good quality with smaller file size
-      });
-      
-      recordedChunks = []; // Reset chunks for new export
+      // Create a dedicated export video element
+      const exportVideo = document.createElement('video');
+      exportVideo.src = currentVideo.src;
+      exportVideo.muted = true;
+      exportVideo.playsInline = true;
       
       // Function to render frame to export canvas
       function renderExportFrame() {
@@ -846,8 +853,8 @@
         const radiusValue = parseInt(cornerRadius.value);
 
         // Calculate video position to center it in the export frame
-        const videoX = (exportCanvas.width - currentVideo.videoWidth) / 2;
-        const videoY = (exportCanvas.height - currentVideo.videoHeight) / 2;
+        const videoX = (exportCanvas.width - exportVideo.videoWidth) / 2;
+        const videoY = (exportCanvas.height - exportVideo.videoHeight) / 2;
 
         // Clear export canvas with background color
         exportCtx.fillStyle = bg;
@@ -863,10 +870,10 @@
         // Draw rounded rectangle for shadow
         if (radiusValue > 0) {
           exportCtx.beginPath();
-          exportCtx.roundRect(videoX, videoY, currentVideo.videoWidth, currentVideo.videoHeight, radiusValue);
+          exportCtx.roundRect(videoX, videoY, exportVideo.videoWidth, exportVideo.videoHeight, radiusValue);
           exportCtx.fill();
         } else {
-          exportCtx.drawImage(currentVideo, videoX, videoY);
+          exportCtx.drawImage(exportVideo, videoX, videoY);
         }
         exportCtx.restore();
 
@@ -874,103 +881,127 @@
         if (radiusValue > 0) {
           exportCtx.save();
           exportCtx.beginPath();
-          exportCtx.roundRect(videoX, videoY, currentVideo.videoWidth, currentVideo.videoHeight, radiusValue);
+          exportCtx.roundRect(videoX, videoY, exportVideo.videoWidth, exportVideo.videoHeight, radiusValue);
           exportCtx.clip();
-          exportCtx.drawImage(currentVideo, videoX, videoY);
+          exportCtx.drawImage(exportVideo, videoX, videoY);
           exportCtx.restore();
         } else {
-          exportCtx.drawImage(currentVideo, videoX, videoY);
+          exportCtx.drawImage(exportVideo, videoX, videoY);
         }
       }
       
-      mediaRecorder.ondataavailable = function(event) {
-        if (event.data.size > 0) {
-          recordedChunks.push(event.data);
-        }
-      };
+      // Set up the export render loop
+      let exportAnimationFrame = null;
+      function exportRenderLoop() {
+        renderExportFrame();
+        exportAnimationFrame = requestAnimationFrame(exportRenderLoop);
+      }
       
-      mediaRecorder.onstop = function() {
-        const blob = new Blob(recordedChunks, { type: 'video/webm' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        // Get original filename and create new filename
-        const fileNameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
-        const newFileName = `Shot Formatted ${fileNameWithoutExt}.webm`;
-        a.download = newFileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      // Start recording when video is ready
+      exportVideo.onloadeddata = function() {
+        // Set up MediaRecorder with the export canvas stream
+        const stream = exportCanvas.captureStream(30); // 30 FPS for smooth export
         
-        // Hide progress bar and show buttons
-        exportProgress.classList.add('hidden');
-        exportBtn.style.display = 'inline-block';
-        exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
-        
-        // If this was an MP4 export, open CloudConvert after download
-        if (isMp4Export) {
-          setTimeout(() => {
-            window.open('https://cloudconvert.com/webm-to-mp4', '_blank');
-          }, 1000); // Increased delay to ensure download completes
+        // Try to use higher quality codec if available
+        let mimeType = 'video/webm;codecs=vp9';
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm;codecs=vp8';
         }
-      };
-      
-      // Reset video to beginning and wait for seek completion
-      currentVideo.currentTime = 0;
-      currentVideo.pause();
-      
-      // Wait for video to seek to beginning, then start recording
-      currentVideo.onseeked = function() {
-        // Start recording
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = 'video/webm';
+        }
+        
+        mediaRecorder = new MediaRecorder(stream, {
+          mimeType: mimeType,
+          videoBitsPerSecond: 3000000 // 3 Mbps for better quality
+        });
+        
+        recordedChunks = []; // Reset chunks for new export
+        
+        mediaRecorder.ondataavailable = function(event) {
+          if (event.data.size > 0) {
+            recordedChunks.push(event.data);
+          }
+        };
+        
+        mediaRecorder.onstop = function() {
+          // Stop the export render loop
+          if (exportAnimationFrame) {
+            cancelAnimationFrame(exportAnimationFrame);
+          }
+          
+          const blob = new Blob(recordedChunks, { type: 'video/webm' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          
+          // Get original filename and create new filename
+          const fileNameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
+          const newFileName = `Shot Formatted ${fileNameWithoutExt}.webm`;
+          a.download = newFileName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          
+          // Hide progress bar and show buttons
+          exportProgress.classList.add('hidden');
+          exportBtn.style.display = 'inline-block';
+          exportMp4DirectBtn.style.display = 'inline-block';
+          exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
+          
+          // If this was an MP4 export, open CloudConvert after download
+          if (isMp4Export) {
+            setTimeout(() => {
+              window.open('https://cloudconvert.com/webm-to-mp4', '_blank');
+            }, 1000);
+          }
+        };
+        
+        // Start recording and playing
         mediaRecorder.start();
+        exportVideo.currentTime = 0;
+        exportVideo.play();
         
-        // Render frames for export with progress tracking
-        const frameInterval = 1000 / 30; // 30 FPS for smoother export
-        const duration = currentVideo.duration * 1000;
-        let currentTime = 0;
-        const startTime = Date.now();
+        // Start the export render loop
+        exportRenderLoop();
         
+        // Set up progress tracking
         const progressBar = document.getElementById('progressBar');
         const progressText = document.getElementById('progressText');
         const timeRemaining = document.getElementById('timeRemaining');
+        const startTime = Date.now();
         
-        const exportInterval = setInterval(() => {
-          if (currentTime >= duration) {
-            clearInterval(exportInterval);
+        function updateProgress() {
+          if (exportVideo.ended) {
             mediaRecorder.stop();
-            
-            // Fallback: If this was an MP4 export and onstop doesn't trigger, open CloudConvert after a longer delay
-            if (isMp4Export) {
-              setTimeout(() => {
-                window.open('https://cloudconvert.com/webm-to-mp4', '_blank');
-              }, 3000);
-            }
             return;
           }
           
-          // Update progress based on export currentTime
-          const videoProgress = (currentTime / duration) * 100;
-          progressBar.style.width = videoProgress + '%';
-          progressText.textContent = Math.round(videoProgress) + '%';
+          const progress = (exportVideo.currentTime / exportVideo.duration) * 100;
+          progressBar.style.width = progress + '%';
+          progressText.textContent = Math.round(progress) + '%';
           
           // Calculate time remaining
           const elapsed = Date.now() - startTime;
-          const estimatedTotal = elapsed / (videoProgress / 100);
+          const estimatedTotal = elapsed / (progress / 100);
           const remaining = estimatedTotal - elapsed;
           
-          if (remaining > 0 && videoProgress > 0) {
+          if (remaining > 0 && progress > 0) {
             const minutes = Math.floor(remaining / 60000);
             const seconds = Math.floor((remaining % 60000) / 1000);
             timeRemaining.textContent = `${minutes}m ${seconds}s remaining`;
           }
           
-          // Set video time and render frame
-          currentVideo.currentTime = currentTime / 1000;
-          renderExportFrame();
-          currentTime += frameInterval;
-        }, frameInterval + 5); // Add small delay to prevent overwhelming
+          // Continue updating progress
+          requestAnimationFrame(updateProgress);
+        }
+        
+        updateProgress();
       };
+      
+      // Load the export video
+      exportVideo.load();
     }
     
     // WebM Export button
