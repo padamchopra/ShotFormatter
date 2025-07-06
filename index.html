@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shot Formatter</title>
+  <script defer src="app.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+    
+    .glass-effect {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    .custom-range {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 8px;
+      border-radius: 4px;
+      background: #e5e7eb;
+      outline: none;
+    }
+    .custom-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #000000;
+      cursor: pointer;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .custom-range::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #000000;
+      cursor: pointer;
+      border: none;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    .file-input-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+    }
+    .file-input-wrapper input[type=file] {
+      position: absolute;
+      left: -9999px;
+    }
+    .file-input-label {
+      display: inline-block;
+      padding: 12px 24px;
+      background: #000000;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-weight: 500;
+    }
+    .file-input-label:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+      background: #333333;
+    }
+    
+    input[type="color"] {
+      border: 2px solid #d1d5db;
+      outline: none;
+      -webkit-appearance: none;
+      appearance: none;
+      border-radius: 8px;
+    }
+    
+    input[type="color"]::-webkit-color-swatch-wrapper {
+      padding: 0;
+      border: none;
+    }
+    
+    input[type="color"]::-webkit-color-swatch {
+      border: none;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <!-- Header -->
+  <div class="text-center mb-8">
+    <h1 class="text-4xl font-bold text-black mb-2">
+      <i class="fas fa-video mr-3"></i>Shot Formatter
+    </h1>
+    <p class="text-gray-600 text-lg">Format your video shots with beautiful shadows</p>
+  </div>
+
+  <!-- Main Layout Container -->
+  <div class="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
+    <!-- Left Side - Controls -->
+    <div class="lg:w-1/2">
+      <div class="glass-effect rounded-2xl p-8 shadow-2xl h-fit">
+        <!-- File Upload Section -->
+        <div class="mb-8">
+          <h2 class="text-xl font-semibold text-black mb-4">
+            <i class="fas fa-upload mr-2"></i>Upload Video
+          </h2>
+          <div class="file-input-wrapper w-full">
+            <input type="file" id="videoInput" accept="video/*" />
+            <label for="videoInput" class="file-input-label w-full text-center block">
+              <i class="fas fa-cloud-upload-alt mr-2"></i>
+              Choose Video File
+            </label>
+          </div>
+          <p class="text-gray-500 text-sm mt-2">Supported formats: MP4, WebM, MOV, AVI</p>
+        </div>
+
+        <!-- Scene Settings Section -->
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-black">
+              <i class="fas fa-palette mr-2"></i>Scene Settings
+            </h2>
+            <button id="resetSceneBtn" class="bg-gray-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-gray-600 hover:scale-105">
+              <i class="fas fa-undo mr-1"></i>Reset
+            </button>
+          </div>
+          <div class="space-y-6">
+            <!-- Background Color -->
+            <div class="flex items-center justify-between">
+              <label class="text-black font-medium">
+                Background Color
+              </label>
+              <div class="flex items-center space-x-3">
+                <input type="color" id="bgColor" value="#efefef" class="w-12 h-10 rounded-lg cursor-pointer" />
+                <span class="text-gray-600 text-sm" id="colorValue">#efefef</span>
+              </div>
+            </div>
+
+            <!-- Corner Radius -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-black font-medium">
+                  Corner Radius
+                </label>
+                <span class="text-gray-600 text-sm" id="cornerRadiusValue">46px</span>
+              </div>
+              <input type="range" id="cornerRadius" min="0" max="150" value="46" class="custom-range w-full" />
+            </div>
+
+            <!-- Frame Aspect Ratio -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-black font-medium">
+                  Frame Ratio
+                </label>
+                <span class="text-gray-600 text-sm" id="frameRatioValue">Auto</span>
+              </div>
+              <select id="frameRatio" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
+                <option value="auto">Auto (Video's natural ratio)</option>
+                <option value="16:9">16:9 (Widescreen)</option>
+                <option value="4:3">4:3 (Standard)</option>
+                <option value="1:1">1:1 (Square)</option>
+                <option value="9:16">9:16 (Portrait)</option>
+                <option value="21:9">21:9 (Ultrawide)</option>
+                <option value="3:2">3:2 (Photo)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div class="mb-8">
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-xl font-semibold text-black">
+              <i class="fas fa-cog mr-2"></i>Shadow Settings
+            </h2>
+            <button id="resetShadowBtn" class="bg-gray-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-gray-600 hover:scale-105">
+              <i class="fas fa-undo mr-1"></i>Reset
+            </button>
+          </div>
+          
+          <div class="space-y-6">
+            <!-- Shadow Offset X -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-black font-medium">
+                  Shadow Offset X
+                </label>
+                <span class="text-gray-600 text-sm" id="offsetXValue">0px</span>
+              </div>
+              <input type="range" id="offsetX" min="0" max="100" value="0" class="custom-range w-full" />
+            </div>
+
+            <!-- Shadow Offset Y -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-black font-medium">
+                  Shadow Offset Y
+                </label>
+                <span class="text-gray-600 text-sm" id="offsetYValue">15px</span>
+              </div>
+              <input type="range" id="offsetY" min="0" max="100" value="15" class="custom-range w-full" />
+            </div>
+
+            <!-- Shadow Blur -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-black font-medium">
+                  Shadow Blur
+                </label>
+                <span class="text-gray-600 text-sm" id="blurValue">60px</span>
+              </div>
+              <input type="range" id="blur" min="1" max="100" value="60" class="custom-range w-full" />
+            </div>
+
+            <!-- Shadow Transparency -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-black font-medium">
+                  Shadow Transparency
+                </label>
+                <span class="text-gray-600 text-sm" id="transparencyValue">20%</span>
+              </div>
+              <input type="range" id="transparency" min="10" max="100" value="20" class="custom-range w-full" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Export Section -->
+        <div class="mb-8" style="display: none;">
+          <h2 class="text-xl font-semibold text-black mb-4">
+            <i class="fas fa-download mr-2"></i>Export
+          </h2>
+          <div class="space-y-3">
+            <button id="exportBtn" class="w-full bg-green-600 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" style="display: none;">
+              <i class="fas fa-download mr-2"></i>Export WebM (Recommended)
+            </button>
+            <button id="exportMp4Btn" class="w-full bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-blue-700 hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" style="display: none;">
+              <i class="fas fa-download mr-2"></i>Export MP4 (CloudConvert)
+            </button>
+            
+            <!-- Progress Bar -->
+            <div id="exportProgress" class="hidden">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-700">Export Progress</span>
+                <span id="progressText" class="text-sm text-gray-500">0%</span>
+              </div>
+              <div class="w-full bg-gray-200 rounded-full h-2">
+                <div id="progressBar" class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
+              </div>
+              <div id="timeRemaining" class="text-xs text-gray-500 mt-1">Calculating...</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right Side - Preview -->
+    <div class="lg:w-1/2">
+      <div class="glass-effect rounded-2xl p-8 shadow-2xl h-fit">
+        <h2 class="text-xl font-semibold text-black mb-4">
+          <i class="fas fa-eye mr-2"></i>Preview
+        </h2>
+        <div class="flex items-center justify-center min-h-[400px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-8" id="previewPlaceholder">
+          <div class="text-center text-gray-500">
+            <i class="fas fa-video text-4xl mb-4"></i>
+            <p class="text-lg font-medium">Upload a video to see preview</p>
+            <p class="text-sm">Your rendered video will appear here</p>
+          </div>
+        </div>
+        <div class="flex justify-center items-center min-h-[400px]">
+          <canvas id="canvas" class="shadow-lg" style="display: none;"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Video Element -->
+  <video id="video" style="display:none" crossorigin="anonymous" loop></video>
+
+  <!-- Loading Indicator -->
+  <div id="loadingIndicator" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style="display: none;">
+    <div class="glass-effect rounded-2xl p-8 text-center">
+      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-black mx-auto mb-4"></div>
+      <p class="text-black text-lg font-semibold">Processing your video...</p>
+    </div>
+  </div>
+
+  <script>
+    // Global variables for render loop
+    let currentAnimationFrame = null;
+    let currentVideo = null;
+    let currentCanvas = null;
+    let currentCtx = null;
+
+    // Function to calculate canvas dimensions based on frame ratio
+    function updateCanvasDimensions() {
+      if (!currentVideo || !currentCanvas) return;
+      
+      const frameRatio = document.getElementById('frameRatio').value;
+      const videoWidth = currentVideo.videoWidth;
+      const videoHeight = currentVideo.videoHeight;
+      const padding = 200;
+      
+      let canvasWidth, canvasHeight;
+      
+      if (frameRatio === 'auto') {
+        // Use video's natural ratio
+        canvasWidth = videoWidth + padding;
+        canvasHeight = videoHeight + padding;
+      } else {
+        // Parse the ratio (e.g., "16:9" -> 16/9)
+        const [widthRatio, heightRatio] = frameRatio.split(':').map(Number);
+        const targetRatio = widthRatio / heightRatio;
+        
+        // Calculate dimensions to fit the video within the target ratio
+        const videoRatio = videoWidth / videoHeight;
+        
+        if (videoRatio > targetRatio) {
+          // Video is wider than target ratio - fit to width
+          canvasWidth = videoWidth + padding;
+          canvasHeight = (videoWidth / targetRatio) + padding;
+        } else {
+          // Video is taller than target ratio - fit to height
+          canvasHeight = videoHeight + padding;
+          canvasWidth = (videoHeight * targetRatio) + padding;
+        }
+      }
+      
+      // Set canvas dimensions
+      currentCanvas.width = canvasWidth;
+      currentCanvas.height = canvasHeight;
+      
+      // Apply max height constraint while maintaining aspect ratio
+      const maxHeight = window.innerHeight * 0.7; // 70vh for screen fitting
+      
+      // First, ensure height fits within screen
+      let scale = 1;
+      if (currentCanvas.height > maxHeight) {
+        scale = maxHeight / currentCanvas.height;
+      }
+      
+      // Apply height-based scaling
+      const scaledHeight = currentCanvas.height * scale;
+      const scaledWidth = currentCanvas.width * scale;
+      
+      // Check if scaled width fits within preview container
+      const previewContainer = currentCanvas.parentElement;
+      const containerWidth = previewContainer.clientWidth;
+      
+      // If width is overflowing, scale down further
+      if (scaledWidth > containerWidth) {
+        scale = scale * (containerWidth / scaledWidth);
+      }
+      
+      // Apply final scaling
+      currentCanvas.style.width = (currentCanvas.width * scale) + 'px';
+      currentCanvas.style.height = (currentCanvas.height * scale) + 'px';
+    }
+
+    // Function to start render loop
+    function startRenderLoop() {
+      if (!currentVideo || !currentCanvas || !currentCtx) return;
+      
+      function renderLoop() {
+        const bgColor = document.getElementById('bgColor');
+        const offsetX = document.getElementById('offsetX');
+        const offsetY = document.getElementById('offsetY');
+        const blur = document.getElementById('blur');
+        const transparency = document.getElementById('transparency');
+        const cornerRadius = document.getElementById('cornerRadius');
+        
+        const bg = bgColor.value;
+        const ox = parseInt(offsetX.value);
+        const oy = parseInt(offsetY.value);
+        const blurValue = parseInt(blur.value);
+        const transparencyValue = parseInt(transparency.value) / 100;
+        const radiusValue = parseInt(cornerRadius.value);
+
+        // Calculate video position to center it in the frame
+        const videoX = (currentCanvas.width - currentVideo.videoWidth) / 2;
+        const videoY = (currentCanvas.height - currentVideo.videoHeight) / 2;
+
+        // Clear canvas with background color
+        currentCtx.fillStyle = bg;
+        currentCtx.fillRect(0, 0, currentCanvas.width, currentCanvas.height);
+
+        // Create shadow effect with rounded corners
+        currentCtx.save();
+        currentCtx.shadowColor = `rgba(0, 0, 0, ${transparencyValue})`;
+        currentCtx.shadowBlur = blurValue;
+        currentCtx.shadowOffsetX = ox;
+        currentCtx.shadowOffsetY = oy;
+        
+        // Draw rounded rectangle for shadow
+        if (radiusValue > 0) {
+          currentCtx.beginPath();
+          currentCtx.roundRect(videoX, videoY, currentVideo.videoWidth, currentVideo.videoHeight, radiusValue);
+          currentCtx.fill();
+        } else {
+          currentCtx.drawImage(currentVideo, videoX, videoY);
+        }
+        currentCtx.restore();
+
+        // Draw the video with rounded corners (on top)
+        if (radiusValue > 0) {
+          currentCtx.save();
+          currentCtx.beginPath();
+          currentCtx.roundRect(videoX, videoY, currentVideo.videoWidth, currentVideo.videoHeight, radiusValue);
+          currentCtx.clip();
+          currentCtx.drawImage(currentVideo, videoX, videoY);
+          currentCtx.restore();
+        } else {
+          currentCtx.drawImage(currentVideo, videoX, videoY);
+        }
+
+        currentAnimationFrame = requestAnimationFrame(renderLoop);
+      }
+      
+      renderLoop();
+    }
+
+    // Update range value displays and trigger re-render
+    document.getElementById('offsetX').addEventListener('input', function() {
+      document.getElementById('offsetXValue').textContent = this.value + 'px';
+      if (currentAnimationFrame) {
+        cancelAnimationFrame(currentAnimationFrame);
+        startRenderLoop();
+      }
+    });
+    
+    document.getElementById('offsetY').addEventListener('input', function() {
+      document.getElementById('offsetYValue').textContent = this.value + 'px';
+      if (currentAnimationFrame) {
+        cancelAnimationFrame(currentAnimationFrame);
+        startRenderLoop();
+      }
+    });
+    
+    document.getElementById('blur').addEventListener('input', function() {
+      document.getElementById('blurValue').textContent = this.value + 'px';
+      if (currentAnimationFrame) {
+        cancelAnimationFrame(currentAnimationFrame);
+        startRenderLoop();
+      }
+    });
+    
+    document.getElementById('transparency').addEventListener('input', function() {
+      document.getElementById('transparencyValue').textContent = this.value + '%';
+      if (currentAnimationFrame) {
+        cancelAnimationFrame(currentAnimationFrame);
+        startRenderLoop();
+      }
+    });
+    
+    document.getElementById('cornerRadius').addEventListener('input', function() {
+      document.getElementById('cornerRadiusValue').textContent = this.value + 'px';
+      if (currentAnimationFrame) {
+        cancelAnimationFrame(currentAnimationFrame);
+        startRenderLoop();
+      }
+    });
+    
+    // Frame ratio change handler
+    document.getElementById('frameRatio').addEventListener('change', function() {
+      const selectedOption = this.options[this.selectedIndex];
+      document.getElementById('frameRatioValue').textContent = selectedOption.text.split(' ')[0];
+      
+      if (currentVideo && currentCanvas) {
+        updateCanvasDimensions();
+        if (currentAnimationFrame) {
+          cancelAnimationFrame(currentAnimationFrame);
+          startRenderLoop();
+        }
+      }
+    });
+    
+    // Reset Scene Settings
+    document.getElementById('resetSceneBtn').addEventListener('click', function() {
+      // Reset background color
+      document.getElementById('bgColor').value = '#efefef';
+      document.getElementById('colorValue').textContent = '#efefef';
+      
+      // Reset corner radius
+      document.getElementById('cornerRadius').value = 46;
+      document.getElementById('cornerRadiusValue').textContent = '46px';
+      
+      // Reset frame ratio
+      document.getElementById('frameRatio').value = 'auto';
+      document.getElementById('frameRatioValue').textContent = 'Auto';
+      
+      // Update canvas dimensions and trigger re-render
+      if (currentVideo && currentCanvas) {
+        updateCanvasDimensions();
+      }
+      if (currentAnimationFrame) {
+        cancelAnimationFrame(currentAnimationFrame);
+        startRenderLoop();
+      }
+    });
+    
+    // Reset Shadow Settings
+    document.getElementById('resetShadowBtn').addEventListener('click', function() {
+      // Reset shadow offset X
+      document.getElementById('offsetX').value = 0;
+      document.getElementById('offsetXValue').textContent = '0px';
+      
+      // Reset shadow offset Y
+      document.getElementById('offsetY').value = 15;
+      document.getElementById('offsetYValue').textContent = '15px';
+      
+      // Reset shadow blur
+      document.getElementById('blur').value = 60;
+      document.getElementById('blurValue').textContent = '60px';
+      
+      // Reset shadow transparency
+      document.getElementById('transparency').value = 20;
+      document.getElementById('transparencyValue').textContent = '20%';
+      
+      // Trigger re-render
+      if (currentAnimationFrame) {
+        cancelAnimationFrame(currentAnimationFrame);
+        startRenderLoop();
+      }
+    });
+    
+    // Update color value display and trigger re-render
+    document.getElementById('bgColor').addEventListener('input', function() {
+      // Ensure we always display hex format
+      const hexValue = this.value;
+      document.getElementById('colorValue').textContent = hexValue;
+      if (currentAnimationFrame) {
+        cancelAnimationFrame(currentAnimationFrame);
+        startRenderLoop();
+      }
+    });
+    
+    // Function to convert RGB to Hex if needed
+    function rgbToHex(r, g, b) {
+      return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+    }
+    
+    // Export functionality
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      if (!currentVideo || !currentCanvas) return;
+      
+      // Show progress bar and hide buttons
+      const exportProgress = document.getElementById('exportProgress');
+      const exportMp4Btn = document.getElementById('exportMp4Btn');
+      exportProgress.classList.remove('hidden');
+      exportMp4Btn.style.display = 'none';
+      this.style.display = 'none';
+      
+      // Reset progress bar to 0%
+      document.getElementById('progressBar').style.width = '0%';
+      document.getElementById('progressText').textContent = '0%';
+      
+      // Create a high-quality export canvas
+      const exportCanvas = document.createElement('canvas');
+      const exportCtx = exportCanvas.getContext('2d');
+      
+      // Set export canvas dimensions based on frame ratio
+      const frameRatio = document.getElementById('frameRatio').value;
+      const videoWidth = currentVideo.videoWidth;
+      const videoHeight = currentVideo.videoHeight;
+      const padding = 200;
+      
+      let exportCanvasWidth, exportCanvasHeight;
+      
+      if (frameRatio === 'auto') {
+        // Use video's natural ratio
+        exportCanvasWidth = videoWidth + padding;
+        exportCanvasHeight = videoHeight + padding;
+      } else {
+        // Parse the ratio (e.g., "16:9" -> 16/9)
+        const [widthRatio, heightRatio] = frameRatio.split(':').map(Number);
+        const targetRatio = widthRatio / heightRatio;
+        
+        // Calculate dimensions to fit the video within the target ratio
+        const videoRatio = videoWidth / videoHeight;
+        
+        if (videoRatio > targetRatio) {
+          // Video is wider than target ratio - fit to width
+          exportCanvasWidth = videoWidth + padding;
+          exportCanvasHeight = (videoWidth / targetRatio) + padding;
+        } else {
+          // Video is taller than target ratio - fit to height
+          exportCanvasHeight = videoHeight + padding;
+          exportCanvasWidth = (videoHeight * targetRatio) + padding;
+        }
+      }
+      
+      exportCanvas.width = exportCanvasWidth;
+      exportCanvas.height = exportCanvasHeight;
+      
+      const stream = exportCanvas.captureStream(60); // 60 FPS for smoother export
+      
+      // Try to use higher quality codec if available
+      let mimeType = 'video/webm;codecs=vp9';
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm;codecs=vp8';
+      }
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'video/webm';
+      }
+      
+      mediaRecorder = new MediaRecorder(stream, {
+        mimeType: mimeType,
+        videoBitsPerSecond: 8000000 // 8 Mbps for high quality
+      });
+      
+      recordedChunks = [];
+      
+      // Function to render frame to export canvas
+      function renderExportFrame() {
+        const bgColor = document.getElementById('bgColor');
+        const offsetX = document.getElementById('offsetX');
+        const offsetY = document.getElementById('offsetY');
+        const blur = document.getElementById('blur');
+        const transparency = document.getElementById('transparency');
+        const cornerRadius = document.getElementById('cornerRadius');
+        
+        const bg = bgColor.value;
+        const ox = parseInt(offsetX.value);
+        const oy = parseInt(offsetY.value);
+        const blurValue = parseInt(blur.value);
+        const transparencyValue = parseInt(transparency.value) / 100;
+        const radiusValue = parseInt(cornerRadius.value);
+
+        // Calculate video position to center it in the export frame
+        const videoX = (exportCanvas.width - currentVideo.videoWidth) / 2;
+        const videoY = (exportCanvas.height - currentVideo.videoHeight) / 2;
+
+        // Clear export canvas with background color
+        exportCtx.fillStyle = bg;
+        exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+
+        // Create shadow effect with rounded corners
+        exportCtx.save();
+        exportCtx.shadowColor = `rgba(0, 0, 0, ${transparencyValue})`;
+        exportCtx.shadowBlur = blurValue;
+        exportCtx.shadowOffsetX = ox;
+        exportCtx.shadowOffsetY = oy;
+        
+        // Draw rounded rectangle for shadow
+        if (radiusValue > 0) {
+          exportCtx.beginPath();
+          exportCtx.roundRect(videoX, videoY, currentVideo.videoWidth, currentVideo.videoHeight, radiusValue);
+          exportCtx.fill();
+        } else {
+          exportCtx.drawImage(currentVideo, videoX, videoY);
+        }
+        exportCtx.restore();
+
+        // Draw the video with rounded corners (on top)
+        if (radiusValue > 0) {
+          exportCtx.save();
+          exportCtx.beginPath();
+          exportCtx.roundRect(videoX, videoY, currentVideo.videoWidth, currentVideo.videoHeight, radiusValue);
+          exportCtx.clip();
+          exportCtx.drawImage(currentVideo, videoX, videoY);
+          exportCtx.restore();
+        } else {
+          exportCtx.drawImage(currentVideo, videoX, videoY);
+        }
+      }
+      
+      mediaRecorder.ondataavailable = function(event) {
+        if (event.data.size > 0) {
+          recordedChunks.push(event.data);
+        }
+      };
+      
+      mediaRecorder.onstop = function() {
+        const blob = new Blob(recordedChunks, { type: 'video/webm' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'shot-formatter-export.webm';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        // Hide progress bar and show buttons
+        exportProgress.classList.add('hidden');
+        exportMp4Btn.style.display = 'inline-block';
+        document.getElementById('exportBtn').style.display = 'inline-block';
+        document.getElementById('exportBtn').innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
+      };
+      
+      // Start recording
+      mediaRecorder.start();
+      
+      // Render frames for export with progress tracking
+      const frameInterval = 1000 / 60; // 60 FPS
+      const duration = currentVideo.duration * 1000;
+      let currentTime = 0;
+      const startTime = Date.now();
+      
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+      const timeRemaining = document.getElementById('timeRemaining');
+      
+      const exportInterval = setInterval(() => {
+        if (currentTime >= duration) {
+          clearInterval(exportInterval);
+          mediaRecorder.stop();
+          return;
+        }
+        
+        // Update progress based on export currentTime
+        const videoProgress = (currentTime / duration) * 100;
+        console.log('Progress:', videoProgress, 'currentTime:', currentTime, 'duration:', duration);
+        progressBar.style.width = videoProgress + '%';
+        progressText.textContent = Math.round(videoProgress) + '%';
+        
+        // Calculate time remaining
+        const elapsed = Date.now() - startTime;
+        const estimatedTotal = elapsed / (videoProgress / 100);
+        const remaining = estimatedTotal - elapsed;
+        
+        if (remaining > 0 && videoProgress > 0) {
+          const minutes = Math.floor(remaining / 60000);
+          const seconds = Math.floor((remaining % 60000) / 1000);
+          timeRemaining.textContent = `${minutes}m ${seconds}s remaining`;
+        }
+        
+        currentVideo.currentTime = currentTime / 1000;
+        renderExportFrame();
+        currentTime += frameInterval;
+      }, frameInterval);
+    });
+    
+        // MP4 Export functionality (WebM with CloudConvert)
+    document.getElementById('exportMp4Btn').addEventListener('click', function() {
+      if (!currentVideo || !currentCanvas) return;
+      
+      // Store the original onstop function
+      const originalOnStop = mediaRecorder.onstop;
+      
+      // Override the onstop to open CloudConvert after download
+      mediaRecorder.onstop = function() {
+        // Call the original onstop function
+        originalOnStop.call(this);
+        
+        // Open CloudConvert in new tab after download completes
+        setTimeout(() => {
+          window.open('https://cloudconvert.com/webm-to-mp4', '_blank');
+        }, 500);
+      };
+      
+      // Trigger the WebM export
+      document.getElementById('exportBtn').click();
+    });
+    
+    // File input label update and auto-render
+    document.getElementById('videoInput').addEventListener('change', function() {
+      const label = document.querySelector('.file-input-label');
+      if (this.files.length > 0) {
+        label.innerHTML = '<i class="fas fa-check mr-2"></i>' + this.files[0].name;
+        label.style.background = '#10b981';
+        
+        // Auto-render the video since all settings have defaults
+        const file = this.files[0];
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Set global variables
+        currentVideo = video;
+        currentCanvas = canvas;
+        currentCtx = ctx;
+        
+        const url = URL.createObjectURL(file);
+        video.src = url;
+        video.load();
+
+        video.onloadeddata = () => {
+          // Update canvas dimensions based on frame ratio
+          updateCanvasDimensions();
+          
+          canvas.style.display = 'block';
+          
+          // Hide the placeholder when video starts rendering
+          const placeholder = document.getElementById('previewPlaceholder');
+          if (placeholder) {
+            placeholder.style.display = 'none';
+          }
+          
+          // Show export section
+          const exportBtn = document.getElementById('exportBtn');
+          const exportMp4Btn = document.getElementById('exportMp4Btn');
+          const exportSection = document.querySelector('#exportBtn').closest('.mb-8');
+          if (exportBtn) {
+            exportBtn.style.display = 'inline-block';
+          }
+          if (exportMp4Btn) {
+            exportMp4Btn.style.display = 'inline-block';
+          }
+          if (exportSection) {
+            exportSection.style.display = 'block';
+          }
+          
+          video.play();
+          
+          // Start render loop
+          startRenderLoop();
+        };
+      } else {
+        label.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i>Choose Video File';
+        label.style.background = '#000000';
+        
+        // Show placeholder and hide canvas when file is removed
+        const placeholder = document.getElementById('previewPlaceholder');
+        const canvas = document.getElementById('canvas');
+        const exportBtn = document.getElementById('exportBtn');
+        const exportMp4Btn = document.getElementById('exportMp4Btn');
+        const exportSection = document.querySelector('#exportBtn').closest('.mb-8');
+        if (placeholder) {
+          placeholder.style.display = 'flex';
+        }
+        if (canvas) {
+          canvas.style.display = 'none';
+        }
+        if (exportBtn) {
+          exportBtn.style.display = 'none';
+        }
+        if (exportMp4Btn) {
+          exportMp4Btn.style.display = 'none';
+        }
+        if (exportSection) {
+          exportSection.style.display = 'none';
+        }
+        
+        // Stop any ongoing animation
+        if (currentAnimationFrame) {
+          cancelAnimationFrame(currentAnimationFrame);
+          currentAnimationFrame = null;
+        }
+      }
+    });
+  </script>
+</body>
+</html>
