@@ -136,8 +136,8 @@
                 Background Color
               </label>
               <div class="flex items-center space-x-3">
-                <input type="color" id="bgColor" value="#efefef" class="w-12 h-10 rounded-lg cursor-pointer" />
-                <span class="text-gray-600 text-sm" id="colorValue">#efefef</span>
+                <input type="color" id="bgColor" value="#fafafa" class="w-12 h-10 rounded-lg cursor-pointer" />
+                <span class="text-gray-600 text-sm" id="colorValue">#fafafa</span>
               </div>
             </div>
 
@@ -298,6 +298,9 @@
     let currentVideo = null;
     let currentCanvas = null;
     let currentCtx = null;
+    let mediaRecorder = null;
+    let recordedChunks = [];
+    let originalFileName = null;
 
     // Function to calculate canvas dimensions based on frame ratio
     function updateCanvasDimensions() {
@@ -484,8 +487,8 @@
     // Reset Scene Settings
     document.getElementById('resetSceneBtn').addEventListener('click', function() {
       // Reset background color
-      document.getElementById('bgColor').value = '#efefef';
-      document.getElementById('colorValue').textContent = '#efefef';
+      document.getElementById('bgColor').value = '#fafafa';
+      document.getElementById('colorValue').textContent = '#fafafa';
       
       // Reset corner radius
       document.getElementById('cornerRadius').value = 46;
@@ -547,18 +550,16 @@
     }
     
     // Export functionality
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    
-    document.getElementById('exportBtn').addEventListener('click', function() {
+    function startExport(isMp4Export = false) {
       if (!currentVideo || !currentCanvas) return;
       
       // Show progress bar and hide buttons
       const exportProgress = document.getElementById('exportProgress');
       const exportMp4Btn = document.getElementById('exportMp4Btn');
+      const exportBtn = document.getElementById('exportBtn');
       exportProgress.classList.remove('hidden');
       exportMp4Btn.style.display = 'none';
-      this.style.display = 'none';
+      exportBtn.style.display = 'none';
       
       // Reset progress bar to 0%
       document.getElementById('progressBar').style.width = '0%';
@@ -615,10 +616,10 @@
       
       mediaRecorder = new MediaRecorder(stream, {
         mimeType: mimeType,
-        videoBitsPerSecond: 8000000 // 8 Mbps for high quality
+        videoBitsPerSecond: 2000000 // 2 Mbps for good quality with smaller file size
       });
       
-      recordedChunks = [];
+      recordedChunks = []; // Reset chunks for new export
       
       // Function to render frame to export canvas
       function renderExportFrame() {
@@ -685,7 +686,10 @@
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = 'shot-formatter-export.webm';
+        // Get original filename and create new filename
+        const fileNameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
+        const newFileName = `Shot Formatted ${fileNameWithoutExt}.webm`;
+        a.download = newFileName;
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -694,8 +698,15 @@
         // Hide progress bar and show buttons
         exportProgress.classList.add('hidden');
         exportMp4Btn.style.display = 'inline-block';
-        document.getElementById('exportBtn').style.display = 'inline-block';
-        document.getElementById('exportBtn').innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
+        exportBtn.style.display = 'inline-block';
+        exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
+        
+        // If this was an MP4 export, open CloudConvert after download
+        if (isMp4Export) {
+          setTimeout(() => {
+            window.open('https://cloudconvert.com/webm-to-mp4', '_blank');
+          }, 1000); // Increased delay to ensure download completes
+        }
       };
       
       // Start recording
@@ -715,12 +726,18 @@
         if (currentTime >= duration) {
           clearInterval(exportInterval);
           mediaRecorder.stop();
+          
+          // Fallback: If this was an MP4 export and onstop doesn't trigger, open CloudConvert after a longer delay
+          if (isMp4Export) {
+            setTimeout(() => {
+              window.open('https://cloudconvert.com/webm-to-mp4', '_blank');
+            }, 3000);
+          }
           return;
         }
         
         // Update progress based on export currentTime
         const videoProgress = (currentTime / duration) * 100;
-        console.log('Progress:', videoProgress, 'currentTime:', currentTime, 'duration:', duration);
         progressBar.style.width = videoProgress + '%';
         progressText.textContent = Math.round(videoProgress) + '%';
         
@@ -739,28 +756,16 @@
         renderExportFrame();
         currentTime += frameInterval;
       }, frameInterval);
+    }
+    
+    // WebM Export button
+    document.getElementById('exportBtn').addEventListener('click', function() {
+      startExport(false);
     });
     
-        // MP4 Export functionality (WebM with CloudConvert)
+    // MP4 Export button
     document.getElementById('exportMp4Btn').addEventListener('click', function() {
-      if (!currentVideo || !currentCanvas) return;
-      
-      // Store the original onstop function
-      const originalOnStop = mediaRecorder.onstop;
-      
-      // Override the onstop to open CloudConvert after download
-      mediaRecorder.onstop = function() {
-        // Call the original onstop function
-        originalOnStop.call(this);
-        
-        // Open CloudConvert in new tab after download completes
-        setTimeout(() => {
-          window.open('https://cloudconvert.com/webm-to-mp4', '_blank');
-        }, 500);
-      };
-      
-      // Trigger the WebM export
-      document.getElementById('exportBtn').click();
+      startExport(true);
     });
     
     // File input label update and auto-render
@@ -775,6 +780,9 @@
         const video = document.getElementById('video');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
+        
+        // Store original filename
+        originalFileName = file.name;
         
         // Set global variables
         currentVideo = video;
