@@ -1324,6 +1324,7 @@
             document.getElementById('exportCard').classList.remove('hidden');
             document.getElementById('exportPngBtn').disabled = false;
             document.getElementById('exportJpegBtn').disabled = false;
+
             
             // Start render loop for videos
             if (mediaType === 'video') {
@@ -1555,22 +1556,22 @@
             }
 
             uploadArea.addEventListener('drop', handleDrop, false);
-
-            function handleDrop(e) {
-                const dt = e.dataTransfer;
-                const files = dt.files;
-                
-                if (files.length > 0) {
-                    const fileInput = document.getElementById('fileInput');
-                    // Create a new FileList-like object
-                    Object.defineProperty(fileInput, 'files', {
-                        value: files,
-                        writable: false,
-                    });
-                    handleFileUpload({ target: { files: files } });
-                }
-            }
         });
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            
+            if (files.length > 0) {
+                const fileInput = document.getElementById('fileInput');
+                // Create a new FileList-like object
+                Object.defineProperty(fileInput, 'files', {
+                    value: files,
+                    writable: false,
+                });
+                handleFileUpload({ target: { files: files } });
+            }
+        };
     </script>
 </body>
 </html>
