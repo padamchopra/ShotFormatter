@@ -1060,13 +1060,14 @@
                         <!-- Canvas Container -->
                         <div class="canvas-container hidden" id="canvasContainer">
                             <canvas id="canvas"></canvas>
-                            <button class="replace-btn" onclick="document.getElementById('fileInput').click()">
-                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                                    <polyline points="17,8 12,3 7,8"/>
-                                    <line x1="12" x2="12" y1="3" y2="15"/>
+                            <button class="replace-btn" onclick="removeMedia()">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                                    <line x1="14" y1="11" x2="14" y2="17"></line>
                                 </svg>
-                                Replace Media
+                                Remove Media
                             </button>
                         </div>
                     </div>
@@ -1270,8 +1271,14 @@
         // File upload handling
         function handleFileUpload(event) {
             const file = event.target.files[0];
-            if (!file) return;
+            if (file) {
+                processFile(file);
+            }
+            // Reset file input value to allow selecting the same file again
+            event.target.value = '';
+        }
 
+        function processFile(file) {
             mediaFile = file;
             mediaType = file.type.startsWith('image/') ? 'image' : 'video';
             
@@ -1284,16 +1291,31 @@
 
             if (mediaType === 'image') {
                 const img = document.getElementById('hiddenImage');
-                img.onload = () => {
-                    hideLoading();
-                    showCanvas();
-                    drawCanvas();
+
+                const onImageLoadCallback = () => {
+                    // Check if the image src is what we expect, to avoid race conditions
+                    if (img.src === url) {
+                        hideLoading();
+                        showCanvas();
+                        drawCanvas();
+                    }
                 };
+
+                img.onload = onImageLoadCallback;
                 img.onerror = () => {
-                    hideLoading();
-                    alert('Error loading image. Please try a different file.');
+                    if (img.src === url) {
+                        hideLoading();
+                        alert('Error loading image. Please try a different file.');
+                    }
                 };
+                
                 img.src = url;
+
+                // If the browser serves the image from cache, the 'complete' property might be true
+                // before the onload handler is attached. In this case, we trigger the callback manually.
+                if (img.complete && img.naturalWidth > 0) {
+                    onImageLoadCallback();
+                }
             } else {
                 const video = document.getElementById('hiddenVideo');
                 video.onloadeddata = () => {
@@ -1526,52 +1548,115 @@
 
             // Drag and drop functionality
             const uploadArea = document.getElementById('uploadArea');
-            
-            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
-                uploadArea.addEventListener(eventName, preventDefaults, false);
-                document.body.addEventListener(eventName, preventDefaults, false);
-            });
+            const canvasContainer = document.getElementById('canvasContainer');
 
             function preventDefaults(e) {
                 e.preventDefault();
                 e.stopPropagation();
             }
 
-            ['dragenter', 'dragover'].forEach(eventName => {
-                uploadArea.addEventListener(eventName, highlight, false);
-            });
-
-            ['dragleave', 'drop'].forEach(eventName => {
-                uploadArea.addEventListener(eventName, unhighlight, false);
-            });
+            function getDropTarget(element) {
+                if (uploadArea.contains(element) && !uploadArea.classList.contains('hidden')) {
+                    return uploadArea;
+                }
+                if (canvasContainer.contains(element) && !canvasContainer.classList.contains('hidden')) {
+                    return canvasContainer;
+                }
+                return null;
+            }
 
             function highlight(e) {
-                uploadArea.style.borderColor = '#60a5fa';
-                uploadArea.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                const dropTarget = getDropTarget(e.currentTarget);
+                if (dropTarget) {
+                    dropTarget.style.borderColor = '#60a5fa';
+                    if (dropTarget.id === 'uploadArea') {
+                        dropTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+                    }
+                }
             }
 
             function unhighlight(e) {
-                uploadArea.style.borderColor = '#1f2937';
-                uploadArea.style.backgroundColor = '#000000';
+                const dropTarget = getDropTarget(e.currentTarget);
+                 if (dropTarget) {
+                    dropTarget.style.borderColor = dropTarget.id === 'uploadArea' ? '#1f2937' : 'transparent';
+                    dropTarget.style.backgroundColor = dropTarget.id === 'uploadArea' ? '#000000' : 'transparent';
+                }
             }
 
-            uploadArea.addEventListener('drop', handleDrop, false);
+            function handleDrop(e) {
+                const dropTarget = getDropTarget(e.currentTarget);
+                if (dropTarget) {
+                    const dt = e.dataTransfer;
+                    const files = dt.files;
+                    if (files.length > 0) {
+                        processFile(files[0]);
+                    }
+                }
+            }
+
+            [uploadArea, canvasContainer].forEach(area => {
+                ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                    area.addEventListener(eventName, preventDefaults, false);
+                });
+                ['dragenter', 'dragover'].forEach(eventName => {
+                    area.addEventListener(eventName, highlight, false);
+                });
+                ['dragleave', 'drop'].forEach(eventName => {
+                    area.addEventListener(eventName, unhighlight, false);
+                });
+                area.addEventListener('drop', handleDrop, false);
+            });
+            
+            // Prevent default drag behaviors on the whole page
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
         });
 
-        function handleDrop(e) {
-            const dt = e.dataTransfer;
-            const files = dt.files;
+        // Remove media function
+        function removeMedia() {
+            // Hide canvas and export card
+            document.getElementById('canvasContainer').classList.add('hidden');
+            document.getElementById('exportCard').classList.add('hidden');
+
+            // Show upload area
+            document.getElementById('uploadArea').classList.remove('hidden');
+
+            const video = document.getElementById('hiddenVideo');
+            const img = document.getElementById('hiddenImage');
             
-            if (files.length > 0) {
-                const fileInput = document.getElementById('fileInput');
-                // Create a new FileList-like object
-                Object.defineProperty(fileInput, 'files', {
-                    value: files,
-                    writable: false,
-                });
-                handleFileUpload({ target: { files: files } });
+            const urlToRevoke = mediaType === 'video' ? video.src : img.src;
+
+            // Remove event listeners to prevent error alerts
+            video.onloadeddata = null;
+            video.onerror = null;
+            img.onload = null;
+            img.onerror = null;
+
+            // Stop video playback and render loop
+            if (mediaType === 'video') {
+                video.pause();
+                video.src = '';
+                stopRenderLoop();
+            } else if (mediaType === 'image') {
+                img.src = '';
             }
-        };
+
+            // Revoke the object URL to free up memory
+            if (urlToRevoke && urlToRevoke.startsWith('blob:')) {
+                URL.revokeObjectURL(urlToRevoke);
+            }
+
+            // Reset media state
+            mediaFile = null;
+            mediaType = null;
+            originalFileName = null;
+            
+            // Clear canvas
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
     </script>
 </body>
 </html>
