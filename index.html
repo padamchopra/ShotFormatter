@@ -1,1404 +1,1576 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Shot Formatter</title>
-  <script defer src="app.js"></script>
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shot Formatter - Format your media with beautiful shadows</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-  <style>
-    body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-    
-    .glass-effect {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(0, 0, 0, 0.1);
-    }
-    .custom-range {
-      -webkit-appearance: none;
-      appearance: none;
-      height: 8px;
-      border-radius: 4px;
-      background: #e5e7eb;
-      outline: none;
-    }
-    .custom-range::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #000000;
-      cursor: pointer;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    .custom-range::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #000000;
-      cursor: pointer;
-      border: none;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-    }
-    .file-input-wrapper {
-      position: relative;
-      overflow: hidden;
-      display: inline-block;
-    }
-    .file-input-wrapper input[type=file] {
-      position: absolute;
-      left: -9999px;
-    }
-    .file-input-label {
-      display: inline-block;
-      padding: 12px 24px;
-      background: #000000;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      font-weight: 500;
-    }
-    .file-input-label:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-      background: #333333;
-    }
-    
-    input[type="color"] {
-      border: 2px solid #d1d5db;
-      outline: none;
-      -webkit-appearance: none;
-      appearance: none;
-      border-radius: 8px;
-    }
-    
-    input[type="color"]::-webkit-color-swatch-wrapper {
-      padding: 0;
-      border: none;
-    }
-    
-    input[type="color"]::-webkit-color-swatch {
-      border: none;
-      border-radius: 6px;
-    }
-  </style>
+        *::before,
+        *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            background: linear-gradient(135deg, #000000 0%, #0f0f23 50%, #000000 100%);
+            min-height: 100vh;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #0f0f23 50%, #000000 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            position: relative;
+            margin: 0;
+            padding: 0;
+            overflow: visible;
+        }
+
+        /* Background Effects */
+        .bg-effects {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            background: linear-gradient(135deg, #000000 0%, #0f0f23 50%, #000000 100%);
+        }
+
+        .bg-gradient-1 {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.08) 0%, transparent 50%);
+        }
+
+        .bg-gradient-2 {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at 80% 20%, rgba(16, 185, 129, 0.05) 0%, transparent 50%);
+        }
+
+        .bg-grid {
+            position: absolute;
+            inset: 0;
+            background-image: 
+                linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+            background-size: 60px 60px;
+        }
+
+        /* Main Container */
+        .container {
+            position: relative;
+            z-index: 10;
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            background: transparent;
+            overflow: visible;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            overflow: visible;
+        }
+
+        .logo-container {
+            display: inline-flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            overflow: visible;
+        }
+
+        .logo {
+            position: relative;
+            overflow: visible;
+        }
+
+        .logo-glow-1 {
+            position: absolute;
+            inset: 0;
+            background: #3b82f6;
+            border-radius: 1rem;
+            filter: blur(3rem);
+            opacity: 0.4;
+            transform: scale(1.5);
+        }
+
+        .logo-glow-2 {
+            position: absolute;
+            inset: 0;
+            background: #60a5fa;
+            border-radius: 1rem;
+            filter: blur(2rem);
+            opacity: 0.3;
+            transform: scale(1.25);
+        }
+
+        .logo-icon {
+            position: relative;
+            background: #000000;
+            padding: 1rem;
+            border-radius: 1rem;
+            border: 1px solid #1f2937;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            z-index: 10;
+        }
+
+        .sparkles-icon {
+            width: 2rem;
+            height: 2rem;
+            color: #60a5fa;
+        }
+
+        .title {
+            font-size: 3rem;
+            font-weight: 900;
+            background: linear-gradient(to right, #ffffff, #dbeafe, #ffffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.025em;
+        }
+
+        .subtitle {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            font-weight: 500;
+            max-width: 32rem;
+            margin: 0 auto;
+            line-height: 1.5;
+        }
+
+        /* Top CTAs */
+        .top-ctas {
+            position: absolute;
+            top: 1.5rem;
+            right: 1.5rem;
+            display: flex;
+            gap: 0.75rem;
+            z-index: 20;
+        }
+
+        .cta-btn {
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid #374151;
+            color: #d1d5db;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            text-decoration: none;
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: all 0.2s;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-btn:hover {
+            background: rgba(17, 24, 39, 0.8);
+            border-color: #4b5563;
+            color: #ffffff;
+        }
+
+        /* Main Layout */
+        .main-layout {
+            display: grid;
+            grid-template-columns: 2fr 3fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 1280px) {
+            .main-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: #000000;
+            border: 1px solid #1f2937;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+            margin-bottom: 2rem;
+        }
+
+        .card-header {
+            padding: 1.5rem 1.5rem 1rem;
+            border-bottom: 1px solid #1f2937;
+        }
+
+        .card-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .card-title-content {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        .card-icon {
+            padding: 0.5rem;
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(96, 165, 250, 0.1));
+            border-radius: 0.75rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.1);
+            width: 2.5rem;
+            height: 2.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card-content {
+            padding: 1.5rem;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-outline {
+            background: #000000;
+            border: 1px solid #374151;
+            color: #9ca3af;
+        }
+
+        .btn-outline:hover {
+            background: #1f2937;
+            border-color: #4b5563;
+            color: #ffffff;
+        }
+
+        .btn-primary {
+            background: linear-gradient(to right, #059669, #10b981);
+            color: #ffffff;
+            font-weight: 700;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(to right, #047857, #059669);
+            transform: scale(1.02);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(to right, #1f2937, #000000);
+            border: 1px solid #374151;
+            color: #ffffff;
+            font-weight: 700;
+            padding: 1rem 1.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            justify-content: center;
+        }
+
+        .btn-secondary:hover {
+            background: linear-gradient(to right, #374151, #1f2937);
+            transform: scale(1.02);
+        }
+
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 2rem;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .label {
+            font-weight: 600;
+            color: #e5e7eb;
+            font-size: 1rem;
+        }
+
+        .value-display {
+            color: #9ca3af;
+            font-size: 0.875rem;
+            font-family: 'Courier New', monospace;
+            background: #000000;
+            padding: 0.25rem 0.75rem;
+            border-radius: 0.5rem;
+            border: 1px solid #374151;
+        }
+
+        .color-input-group {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .color-input {
+            width: 3.5rem;
+            height: 3rem;
+            border-radius: 0.75rem;
+            border: 2px solid #374151;
+            cursor: pointer;
+            background: #000000;
+            transition: all 0.2s;
+            padding: 0;
+            margin: 0;
+            outline: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+
+        .color-input:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Color input webkit specific styling */
+        .color-input::-webkit-color-swatch-wrapper {
+            padding: 0;
+            border: none;
+            border-radius: 0.75rem;
+        }
+
+        .color-input::-webkit-color-swatch {
+            border: none;
+            border-radius: 0.75rem;
+        }
+
+        /* Firefox specific styling */
+        .color-input::-moz-color-swatch {
+            border: none;
+            border-radius: 0.75rem;
+        }
+
+        .select {
+            width: 100%;
+            background: #000000;
+            border: 1px solid #374151;
+            color: #e5e7eb;
+            padding: 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+        }
+
+        .select:hover {
+            background: #1f2937;
+        }
+
+        /* Custom Slider */
+        .slider-container {
+            position: relative;
+            width: 100%;
+            height: 1rem;
+            margin: 1rem 0;
+        }
+
+        .slider-track {
+            position: absolute;
+            width: 100%;
+            height: 1rem;
+            background: linear-gradient(90deg, #111827 0%, #1f2937 50%, #111827 100%);
+            border-radius: 9999px;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(255, 255, 255, 0.05);
+            cursor: pointer;
+        }
+
+        .slider-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6 0%, #60a5fa 100%);
+            border-radius: 9999px;
+            box-shadow: 
+                0 0 15px rgba(59, 130, 246, 0.5),
+                0 2px 6px rgba(59, 130, 246, 0.3),
+                inset 0 1px 2px rgba(255, 255, 255, 0.2);
+            transition: width 0.15s ease;
+            min-width: 0%;
+        }
+
+        .slider-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.1) 100%);
+            border-radius: inherit;
+        }
+
+        .slider-thumb {
+            position: absolute;
+            top: 50%;
+            width: 1.5rem;
+            height: 1.5rem;
+            background: linear-gradient(135deg, #ffffff 0%, #e5e7eb 50%, #d1d5db 100%);
+            border: 2px solid #374151;
+            border-radius: 50%;
+            cursor: pointer;
+            transform: translate(-50%, -50%);
+            box-shadow: 
+                0 4px 8px rgba(0, 0, 0, 0.3),
+                0 2px 4px rgba(0, 0, 0, 0.2),
+                inset 0 1px 2px rgba(255, 255, 255, 0.8),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+            transition: all 0.15s ease;
+            z-index: 10;
+            min-left: 0%;
+            max-left: 100%;
+        }
+
+        .slider-thumb:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            border-color: #3b82f6;
+            box-shadow: 
+                0 6px 12px rgba(0, 0, 0, 0.4),
+                0 3px 6px rgba(0, 0, 0, 0.3),
+                0 0 0 4px rgba(59, 130, 246, 0.1),
+                inset 0 1px 2px rgba(255, 255, 255, 0.9),
+                inset 0 -1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .slider-thumb::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0.5rem;
+            height: 0.5rem;
+            background: linear-gradient(135deg, rgba(156, 163, 175, 0.8) 0%, rgba(107, 114, 128, 1) 100%);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Preview Area */
+        .preview-area {
+            min-height: 500px;
+            background: #000000;
+            border: 1px solid #1f2937;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s;
+            overflow: hidden;
+        }
+
+        .preview-area:hover {
+            border-color: #374151;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .upload-placeholder {
+            text-align: center;
+            color: #6b7280;
+            position: relative;
+            z-index: 10;
+        }
+
+        .upload-icon-container {
+            width: 5rem;
+            height: 5rem;
+            background: #000000;
+            border: 1px solid #1f2937;
+            border-radius: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            transition: all 0.3s;
+        }
+
+        .preview-area:hover .upload-icon-container {
+            transform: scale(1.05);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+        }
+
+        .upload-icon {
+            width: 2rem;
+            height: 2rem;
+            color: #6b7280;
+            transition: color 0.3s;
+        }
+
+        .preview-area:hover .upload-icon {
+            color: #60a5fa;
+        }
+
+        .upload-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+            transition: color 0.3s;
+        }
+
+        .preview-area:hover .upload-title {
+            color: #ffffff;
+        }
+
+        .upload-subtitle {
+            color: #6b7280;
+            margin-bottom: 1rem;
+            max-width: 20rem;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.75;
+        }
+
+        .file-types {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.75rem;
+            color: #6b7280;
+            background: #000000;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            border: 1px solid #1f2937;
+        }
+
+        .canvas-container {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            background: #000000;
+            border-radius: 1rem;
+            padding: 2rem;
+        }
+
+        .canvas-container canvas {
+            max-width: 100%;
+            height: auto;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8);
+            transition: all 0.3s;
+        }
+
+        .canvas-container:hover canvas {
+            box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.8);
+        }
+
+        .replace-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            opacity: 0;
+            transition: all 0.3s;
+            background: #000000;
+            border: 1px solid #374151;
+            color: #ffffff;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+
+        .canvas-container:hover .replace-btn {
+            opacity: 1;
+        }
+
+        .replace-btn:hover {
+            background: #1f2937;
+            transform: scale(1.05);
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            background: #000000;
+            border: 1px solid #374151;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+
+        .progress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0.75rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #e5e7eb;
+        }
+
+        .progress-value {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            font-family: 'Courier New', monospace;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 0.75rem;
+            background: #1f2937;
+            border-radius: 9999px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #10b981, #059669);
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+            box-shadow: 0 2px 4px rgba(16, 185, 129, 0.3);
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+
+        .loading-card {
+            background: #000000;
+            border: 1px solid #1f2937;
+            border-radius: 1rem;
+            padding: 3rem;
+            text-align: center;
+            box-shadow: 0 35px 60px -12px rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(20px);
+        }
+
+        .loading-spinner-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .loading-glow {
+            position: absolute;
+            inset: 0;
+            background: #3b82f6;
+            border-radius: 50%;
+            filter: blur(2rem);
+            opacity: 0.3;
+        }
+
+        .loading-spinner {
+            position: relative;
+            width: 5rem;
+            height: 5rem;
+            border: 4px solid transparent;
+            border-bottom: 4px solid #60a5fa;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .loading-title {
+            color: #ffffff;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .loading-subtitle {
+            color: #9ca3af;
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Icons */
+        .icon {
+            width: 1rem;
+            height: 1rem;
+            fill: none;
+            stroke: #60a5fa;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .icon-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .title {
+                font-size: 2rem;
+            }
+
+            .top-ctas {
+                position: relative;
+                top: auto;
+                right: auto;
+                justify-content: center;
+                margin-bottom: 2rem;
+            }
+
+            .main-layout {
+                gap: 1rem;
+            }
+
+            .card-content {
+                padding: 1rem;
+            }
+        }
+    </style>
 </head>
-<body class="bg-gray-100 min-h-screen p-6">
-  <!-- Header -->
-  <div class="text-center mb-8">
-    <h1 class="text-4xl font-bold text-black mb-2">
-      <i class="fas fa-image mr-3"></i>Shot Formatter
-    </h1>
-    <p class="text-gray-600 text-lg">Format your media with beautiful shadows</p>
-  </div>
+<body>
+    <!-- Background Effects -->
+    <div class="bg-effects">
+        <div class="bg-gradient-1"></div>
+        <div class="bg-gradient-2"></div>
+        <div class="bg-grid"></div>
+    </div>
 
-  <!-- Main Layout Container -->
-  <div class="flex flex-col lg:flex-row gap-8 max-w-7xl mx-auto">
-    <!-- Left Side - Controls -->
-    <div class="lg:w-1/2">
-      <div class="glass-effect rounded-2xl p-8 shadow-2xl h-fit">
-        <!-- File Upload Section -->
-        <div class="mb-8">
-          <h2 class="text-xl font-semibold text-black mb-4">
-            <i class="fas fa-upload mr-2"></i>Upload Media
-          </h2>
-          <div class="file-input-wrapper w-full">
-            <input type="file" id="mediaInput" accept="video/*,image/*" />
-            <label for="mediaInput" class="file-input-label w-full text-center block">
-              <i class="fas fa-cloud-upload-alt mr-2"></i>
-              Choose Media File
-            </label>
-          </div>
-          <p class="text-gray-500 text-sm mt-2">Supported formats: MP4, WebM, MOV, AVI, JPG, PNG, GIF, WebP</p>
+    <!-- Top CTAs -->
+    <div class="top-ctas">
+        <a href="https://twitter.com/PadamChopra_" target="_blank" class="cta-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+            </svg>
+            Follow on X
+        </a>
+        <a href="https://github.com/padamchopra/ShotFormatter" target="_blank" class="cta-btn">
+            <svg class="icon-sm" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+            </svg>
+            Star on GitHub
+        </a>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo-container">
+                <div class="logo">
+                    <div class="logo-glow-1"></div>
+                    <div class="logo-glow-2"></div>
+                    <div class="logo-icon">
+                        <svg class="sparkles-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+                            <path d="M5 3v4"/>
+                            <path d="M19 17v4"/>
+                            <path d="M3 5h4"/>
+                            <path d="M17 19h4"/>
+                        </svg>
+                    </div>
+                </div>
+                <h1 class="title">Shot Formatter</h1>
+            </div>
+            <p class="subtitle">Beautiful shadows. Professional formatting. Instantly.</p>
         </div>
 
-        <!-- Scene Settings Section -->
-        <div class="mb-8">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-black">
-              <i class="fas fa-palette mr-2"></i>Scene Settings
-            </h2>
-            <button id="resetSceneBtn" class="bg-gray-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-gray-600 hover:scale-105">
-              <i class="fas fa-undo mr-1"></i>Reset
-            </button>
-          </div>
-          <div class="space-y-6">
-            <!-- Background Color -->
-            <div class="flex items-center justify-between">
-              <label class="text-black font-medium">
-                Background Color
-              </label>
-              <div class="flex items-center space-x-3">
-                <input type="color" id="bgColor" value="#fafafa" class="w-12 h-10 rounded-lg cursor-pointer" />
-                <span class="text-gray-600 text-sm" id="colorValue">#fafafa</span>
-              </div>
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Left Side - Controls -->
+            <div class="controls">
+                <!-- Scene Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-title-content">
+                                <div class="card-icon">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2">
+                                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+                                        <circle cx="9" cy="9" r="2"/>
+                                        <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/>
+                                    </svg>
+                                </div>
+                                Scene Settings
+                            </div>
+                            <button class="btn btn-outline" onclick="resetSceneSettings()">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                    <path d="M3 3v5h5"/>
+                                </svg>
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <!-- Background Color -->
+                        <div class="form-group">
+                            <div class="form-row">
+                                <label class="label">Background Color</label>
+                                <div class="color-input-group">
+                                    <input type="color" id="bgColor" class="color-input" value="#fafafa" onchange="updateSetting('bgColor', this.value)">
+                                    <span class="value-display" id="bgColorValue">#fafafa</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Corner Radius -->
+                        <div class="form-group">
+                            <div class="form-row">
+                                <label class="label">Corner Radius</label>
+                                <span class="value-display" id="cornerRadiusValue">46px</span>
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-track" onclick="handleSliderClick(event, 'cornerRadius', 0, 150)">
+                                    <div class="slider-fill" id="cornerRadiusFill"></div>
+                                    <div class="slider-thumb" id="cornerRadiusThumb" onmousedown="startDrag(event, 'cornerRadius', 0, 150)"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Frame Ratio -->
+                        <div class="form-group">
+                            <label class="label">Frame Ratio</label>
+                            <select class="select" id="frameRatio" onchange="updateSetting('frameRatio', this.value)">
+                                <option value="1:1">1:1 (Square) — Instagram, Facebook, X</option>
+                                <option value="auto">Auto (Media's natural ratio)</option>
+                                <option value="16:9">16:9 (Widescreen) — YouTube, Facebook, X</option>
+                                <option value="4:3">4:3 (Standard) — Classic TV, some Facebook/Instagram</option>
+                                <option value="9:16">9:16 (Vertical) — Stories, Reels, TikTok, Shorts</option>
+                                <option value="21:9">21:9 (Ultrawide) — Cinema, widescreen</option>
+                                <option value="3:2">3:2 (Photo) — DSLR, photo posts</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shadow Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-title-content">
+                                <div class="card-icon">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2">
+                                        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2z"/>
+                                        <path d="M12 2v20"/>
+                                        <path d="M2 12h20"/>
+                                    </svg>
+                                </div>
+                                Shadow Settings
+                            </div>
+                            <button class="btn btn-outline" onclick="resetShadowSettings()">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                                    <path d="M3 3v5h5"/>
+                                </svg>
+                                Reset
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <!-- Shadow Offset X -->
+                        <div class="form-group">
+                            <div class="form-row">
+                                <label class="label">Shadow Offset X</label>
+                                <span class="value-display" id="offsetXValue">0px</span>
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-track" onclick="handleSliderClick(event, 'offsetX', 0, 100)">
+                                    <div class="slider-fill" id="offsetXFill"></div>
+                                    <div class="slider-thumb" id="offsetXThumb" onmousedown="startDrag(event, 'offsetX', 0, 100)"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shadow Offset Y -->
+                        <div class="form-group">
+                            <div class="form-row">
+                                <label class="label">Shadow Offset Y</label>
+                                <span class="value-display" id="offsetYValue">15px</span>
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-track" onclick="handleSliderClick(event, 'offsetY', 0, 100)">
+                                    <div class="slider-fill" id="offsetYFill"></div>
+                                    <div class="slider-thumb" id="offsetYThumb" onmousedown="startDrag(event, 'offsetY', 0, 100)"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shadow Blur -->
+                        <div class="form-group">
+                            <div class="form-row">
+                                <label class="label">Shadow Blur</label>
+                                <span class="value-display" id="blurValue">60px</span>
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-track" onclick="handleSliderClick(event, 'blur', 1, 100)">
+                                    <div class="slider-fill" id="blurFill"></div>
+                                    <div class="slider-thumb" id="blurThumb" onmousedown="startDrag(event, 'blur', 1, 100)"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Shadow Strength -->
+                        <div class="form-group">
+                            <div class="form-row">
+                                <label class="label">Shadow Strength</label>
+                                <span class="value-display" id="transparencyValue">100%</span>
+                            </div>
+                            <div class="slider-container">
+                                <div class="slider-track" onclick="handleSliderClick(event, 'transparency', 10, 400)">
+                                    <div class="slider-fill" id="transparencyFill"></div>
+                                    <div class="slider-thumb" id="transparencyThumb" onmousedown="startDrag(event, 'transparency', 10, 400)"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Export Section -->
+                <div class="card hidden" id="exportCard">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-title-content">
+                                <div class="card-icon">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="7,10 12,15 17,10"/>
+                                        <line x1="12" x2="12" y1="15" y2="3"/>
+                                    </svg>
+                                </div>
+                                Export
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <div style="display: grid; gap: 1rem;">
+                            <button class="btn btn-primary" onclick="exportImage('png')" disabled id="exportPngBtn">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" x2="12" y1="15" y2="3"/>
+                                </svg>
+                                Export PNG (Recommended)
+                            </button>
+                            <button class="btn btn-secondary" onclick="exportImage('jpeg')" disabled id="exportJpegBtn">
+                                <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="7,10 12,15 17,10"/>
+                                    <line x1="12" x2="12" y1="15" y2="3"/>
+                                </svg>
+                                Export JPEG
+                            </button>
+                        </div>
+
+                        <!-- Progress Bar -->
+                        <div class="progress-container hidden" id="progressContainer">
+                            <div class="progress-header">
+                                <span class="progress-label">Export Progress</span>
+                                <span class="progress-value" id="progressValue">0%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Corner Radius -->
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <label class="text-black font-medium">
-                  Corner Radius
-                </label>
-                <span class="text-gray-600 text-sm" id="cornerRadiusValue">46px</span>
-              </div>
-              <input type="range" id="cornerRadius" min="0" max="150" value="46" class="custom-range w-full" />
-            </div>
+            <!-- Right Side - Preview -->
+            <div class="preview">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-title">
+                            <div class="card-title-content">
+                                <div class="card-icon">
+                                    <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2">
+                                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/>
+                                        <circle cx="12" cy="12" r="3"/>
+                                    </svg>
+                                </div>
+                                Preview
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-content">
+                        <input type="file" id="fileInput" accept="video/*,image/*" class="hidden" onchange="handleFileUpload(event)">
+                        
+                        <!-- Upload Placeholder -->
+                        <div class="preview-area" id="uploadArea" onclick="document.getElementById('fileInput').click()">
+                            <div class="upload-placeholder">
+                                <div class="upload-icon-container">
+                                    <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                        <polyline points="17,8 12,3 7,8"/>
+                                        <line x1="12" x2="12" y1="3" y2="15"/>
+                                    </svg>
+                                </div>
+                                <h3 class="upload-title">Drop your media here</h3>
+                                <p class="upload-subtitle">Click to browse or drag and drop your image or video file</p>
+                                <div class="file-types">
+                                    <span>MP4, WebM, MOV, JPG, PNG, GIF, WebP</span>
+                                </div>
+                            </div>
+                        </div>
 
-            <!-- Frame Aspect Ratio -->
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <label class="text-black font-medium">
-                  Frame Ratio
-                </label>
-                <span class="text-gray-600 text-sm" id="frameRatioValue">Auto</span>
-              </div>
-              <select id="frameRatio" class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent">
-                <option value="auto">Auto (Media's natural ratio)</option>
-                <option value="16:9">16:9 (Widescreen) — YouTube, Facebook, X (landscape)</option>
-                <option value="4:3">4:3 (Standard) — Classic TV, some Facebook/Instagram</option>
-                <option value="1:1">1:1 (Square) — Instagram, Facebook, X (square)</option>
-                <option value="9:16">9:16 (Vertical) — Stories, Reels, TikTok, Shorts</option>
-                <option value="21:9">21:9 (Ultrawide) — Cinema, widescreen</option>
-                <option value="3:2">3:2 (Photo) — DSLR, photo posts</option>
-              </select>
+                        <!-- Canvas Container -->
+                        <div class="canvas-container hidden" id="canvasContainer">
+                            <canvas id="canvas"></canvas>
+                            <button class="replace-btn" onclick="document.getElementById('fileInput').click()">
+                                <svg class="icon-sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                    <polyline points="17,8 12,3 7,8"/>
+                                    <line x1="12" x2="12" y1="3" y2="15"/>
+                                </svg>
+                                Replace Media
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
+    </div>
 
-        <!-- Settings Section -->
-        <div class="mb-8">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-xl font-semibold text-black">
-              <i class="fas fa-cog mr-2"></i>Shadow Settings
-            </h2>
-            <button id="resetShadowBtn" class="bg-gray-500 text-white px-3 py-1 rounded-lg text-sm font-medium transition-all duration-300 hover:bg-gray-600 hover:scale-105">
-              <i class="fas fa-undo mr-1"></i>Reset
-            </button>
-          </div>
-          
-          <div class="space-y-6">
-            <!-- Shadow Offset X -->
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <label class="text-black font-medium">
-                  Shadow Offset X
-                </label>
-                <span class="text-gray-600 text-sm" id="offsetXValue">0px</span>
-              </div>
-              <input type="range" id="offsetX" min="0" max="100" value="0" class="custom-range w-full" />
-            </div>
+    <!-- Hidden Media Elements -->
+    <video id="hiddenVideo" class="hidden" crossorigin="anonymous" loop muted></video>
+    <img id="hiddenImage" class="hidden" crossorigin="anonymous" alt="Preview">
 
-            <!-- Shadow Offset Y -->
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <label class="text-black font-medium">
-                  Shadow Offset Y
-                </label>
-                <span class="text-gray-600 text-sm" id="offsetYValue">15px</span>
-              </div>
-              <input type="range" id="offsetY" min="0" max="100" value="15" class="custom-range w-full" />
+    <!-- Loading Overlay -->
+    <div class="loading-overlay hidden" id="loadingOverlay">
+        <div class="loading-card">
+            <div class="loading-spinner-container">
+                <div class="loading-glow"></div>
+                <div class="loading-spinner"></div>
             </div>
-
-            <!-- Shadow Blur -->
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <label class="text-black font-medium">
-                  Shadow Blur
-                </label>
-                <span class="text-gray-600 text-sm" id="blurValue">60px</span>
-              </div>
-              <input type="range" id="blur" min="1" max="100" value="60" class="custom-range w-full" />
-            </div>
-
-            <!-- Shadow Transparency -->
-            <div>
-              <div class="flex items-center justify-between mb-2">
-                <label class="text-black font-medium">
-                  Shadow Transparency
-                </label>
-                <span class="text-gray-600 text-sm" id="transparencyValue">20%</span>
-              </div>
-              <input type="range" id="transparency" min="10" max="100" value="20" class="custom-range w-full" />
-            </div>
-          </div>
+            <h3 class="loading-title">Processing your media...</h3>
+            <p class="loading-subtitle">This will just take a moment</p>
         </div>
+    </div>
 
-        <!-- Export Section -->
-        <div class="mb-8" style="display: none;">
-          <h2 class="text-xl font-semibold text-black mb-4">
-            <i class="fas fa-download mr-2"></i>Export
-          </h2>
-          <div class="space-y-3">
-            <button id="exportBtn" class="w-full bg-green-600 text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-green-700 hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" style="display: none;">
-              <i class="fas fa-download mr-2"></i>Export PNG (Recommended)
-            </button>
+    <script>
+        // Application State
+        let settings = {
+            bgColor: '#fafafa',
+            cornerRadius: 46,
+            frameRatio: '1:1',
+            offsetX: 0,
+            offsetY: 15,
+            blur: 60,
+            transparency: 100
+        };
 
-            <button id="exportMp4DirectBtn" class="w-full bg-black text-white px-6 py-3 rounded-xl font-semibold text-lg transition-all duration-300 hover:bg-gray-900 hover:scale-105 hover:shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none" style="display: none;">
-              <i class="fas fa-download mr-2"></i>Export JPEG
-            </button>
+        let mediaFile = null;
+        let mediaType = null;
+        let originalFileName = null;
+        let isExporting = false;
+        let isDragging = false;
+        let currentSlider = null;
+
+        // Default settings for reset
+        const defaultSettings = {
+            bgColor: '#fafafa',
+            cornerRadius: 46,
+            frameRatio: '1:1',
+            offsetX: 0,
+            offsetY: 15,
+            blur: 60,
+            transparency: 100
+        };
+
+        // Canvas roundRect polyfill for older browsers
+        if (!CanvasRenderingContext2D.prototype.roundRect) {
+            CanvasRenderingContext2D.prototype.roundRect = function(x, y, width, height, radius) {
+                if (typeof radius === 'number') {
+                    radius = {tl: radius, tr: radius, br: radius, bl: radius};
+                } else {
+                    radius = {tl: 0, tr: 0, br: 0, bl: 0, ...radius};
+                }
+                
+                this.beginPath();
+                this.moveTo(x + radius.tl, y);
+                this.lineTo(x + width - radius.tr, y);
+                this.quadraticCurveTo(x + width, y, x + width, y + radius.tr);
+                this.lineTo(x + width, y + height - radius.br);
+                this.quadraticCurveTo(x + width, y + height, x + width - radius.br, y + height);
+                this.lineTo(x + radius.bl, y + height);
+                this.quadraticCurveTo(x, y + height, x, y + height - radius.bl);
+                this.lineTo(x, y + radius.tl);
+                this.quadraticCurveTo(x, y, x + radius.tl, y);
+                this.closePath();
+                return this;
+            };
+        }
+
+        // Update setting function
+        function updateSetting(key, value) {
+            settings[key] = value;
             
-            <!-- Progress Bar -->
-            <div id="exportProgress" class="hidden">
-              <div class="flex items-center justify-between mb-2">
-                <span class="text-sm font-medium text-gray-700">Export Progress</span>
-                <span id="progressText" class="text-sm text-gray-500">0%</span>
-              </div>
-              <div class="w-full bg-gray-200 rounded-full h-2">
-                <div id="progressBar" class="bg-green-600 h-2 rounded-full" style="width: 0%"></div>
-              </div>
-              <div id="timeRemaining" class="text-xs text-gray-500 mt-1">Calculating...</div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Right Side - Preview -->
-    <div class="lg:w-1/2">
-      <div class="glass-effect rounded-2xl p-8 shadow-2xl h-fit">
-        <h2 class="text-xl font-semibold text-black mb-4">
-          <i class="fas fa-eye mr-2"></i>Preview
-        </h2>
-        <div class="flex items-center justify-center min-h-[400px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 p-8" id="previewPlaceholder">
-          <div class="text-center text-gray-500">
-            <i class="fas fa-image text-4xl mb-4"></i>
-            <p class="text-lg font-medium">Upload media to see preview</p>
-            <p class="text-sm">Your rendered media will appear here</p>
-          </div>
-        </div>
-        <div class="flex justify-center items-center min-h-[400px]">
-          <canvas id="canvas" class="shadow-lg" style="display: none;"></canvas>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Hidden Media Elements -->
-  <video id="video" style="display:none" crossorigin="anonymous" loop></video>
-  <img id="image" style="display:none" crossorigin="anonymous" />
-
-  <!-- Loading Indicator -->
-  <div id="loadingIndicator" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" style="display: none;">
-    <div class="glass-effect rounded-2xl p-8 text-center">
-      <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-black mx-auto mb-4"></div>
-      <p class="text-black text-lg font-semibold">Processing your video...</p>
-    </div>
-  </div>
-
-  <script>
-    // Global variables for render loop
-    let currentAnimationFrame = null;
-    let currentVideo = null;
-    let currentImage = null;
-    let currentCanvas = null;
-    let currentCtx = null;
-    let mediaRecorder = null;
-    let recordedChunks = [];
-    let originalFileName = null;
-    let isVideo = false;
-    let isImage = false;
-
-    // Function to calculate canvas dimensions based on frame ratio
-    function updateCanvasDimensions() {
-      if (!currentCanvas) return;
-      
-      const frameRatio = document.getElementById('frameRatio').value;
-      let mediaWidth, mediaHeight;
-      
-      if (isVideo && currentVideo) {
-        mediaWidth = currentVideo.videoWidth;
-        mediaHeight = currentVideo.videoHeight;
-      } else if (isImage && currentImage) {
-        mediaWidth = currentImage.naturalWidth;
-        mediaHeight = currentImage.naturalHeight;
-      } else {
-        return;
-      }
-      
-      const padding = 200;
-      
-      let canvasWidth, canvasHeight;
-      
-      if (frameRatio === 'auto') {
-        // Use media's natural ratio
-        canvasWidth = mediaWidth + padding;
-        canvasHeight = mediaHeight + padding;
-      } else {
-        // Parse the ratio (e.g., "16:9" -> 16/9)
-        const [widthRatio, heightRatio] = frameRatio.split(':').map(Number);
-        const targetRatio = widthRatio / heightRatio;
-        
-        // Calculate dimensions to fit the media within the target ratio
-        const mediaRatio = mediaWidth / mediaHeight;
-        
-        if (mediaRatio > targetRatio) {
-          // Media is wider than target ratio - fit to width
-          canvasWidth = mediaWidth + padding;
-          canvasHeight = (mediaWidth / targetRatio) + padding;
-        } else {
-          // Media is taller than target ratio - fit to height
-          canvasHeight = mediaHeight + padding;
-          canvasWidth = (mediaHeight * targetRatio) + padding;
-        }
-      }
-      
-      // Set canvas dimensions
-      currentCanvas.width = canvasWidth;
-      currentCanvas.height = canvasHeight;
-      
-      // Apply max height constraint while maintaining aspect ratio
-      const maxHeight = window.innerHeight * 0.7; // 70vh for screen fitting
-      
-      // First, ensure height fits within screen
-      let scale = 1;
-      if (currentCanvas.height > maxHeight) {
-        scale = maxHeight / currentCanvas.height;
-      }
-      
-      // Apply height-based scaling
-      const scaledHeight = currentCanvas.height * scale;
-      const scaledWidth = currentCanvas.width * scale;
-      
-      // Check if scaled width fits within preview container
-      const previewContainer = currentCanvas.parentElement;
-      const containerWidth = previewContainer.clientWidth;
-      
-      // If width is overflowing, scale down further
-      if (scaledWidth > containerWidth) {
-        scale = scale * (containerWidth / scaledWidth);
-      }
-      
-      // Apply final scaling
-      currentCanvas.style.width = (currentCanvas.width * scale) + 'px';
-      currentCanvas.style.height = (currentCanvas.height * scale) + 'px';
-    }
-
-    // Function to start render loop
-    function startRenderLoop() {
-      if (!currentCanvas || !currentCtx) return;
-      
-      function renderLoop() {
-        const bgColor = document.getElementById('bgColor');
-        const offsetX = document.getElementById('offsetX');
-        const offsetY = document.getElementById('offsetY');
-        const blur = document.getElementById('blur');
-        const transparency = document.getElementById('transparency');
-        const cornerRadius = document.getElementById('cornerRadius');
-        
-        const bg = bgColor.value;
-        const ox = parseInt(offsetX.value);
-        const oy = parseInt(offsetY.value);
-        const blurValue = parseInt(blur.value);
-        const transparencyValue = parseInt(transparency.value) / 100;
-        const radiusValue = parseInt(cornerRadius.value);
-
-        // Calculate media position to center it in the frame
-        let mediaX, mediaY, mediaWidth, mediaHeight;
-        
-        if (isVideo && currentVideo) {
-          mediaWidth = currentVideo.videoWidth;
-          mediaHeight = currentVideo.videoHeight;
-        } else if (isImage && currentImage) {
-          mediaWidth = currentImage.naturalWidth;
-          mediaHeight = currentImage.naturalHeight;
-        } else {
-          return;
-        }
-        
-        mediaX = (currentCanvas.width - mediaWidth) / 2;
-        mediaY = (currentCanvas.height - mediaHeight) / 2;
-
-        // Clear canvas with background color
-        currentCtx.fillStyle = bg;
-        currentCtx.fillRect(0, 0, currentCanvas.width, currentCanvas.height);
-
-        // Create shadow effect with rounded corners
-        currentCtx.save();
-        currentCtx.shadowColor = `rgba(0, 0, 0, ${transparencyValue})`;
-        currentCtx.shadowBlur = blurValue;
-        currentCtx.shadowOffsetX = ox;
-        currentCtx.shadowOffsetY = oy;
-        
-        // Draw rounded rectangle for shadow
-        if (radiusValue > 0) {
-          currentCtx.beginPath();
-          currentCtx.roundRect(mediaX, mediaY, mediaWidth, mediaHeight, radiusValue);
-          currentCtx.fill();
-        } else {
-          if (isVideo && currentVideo) {
-            currentCtx.drawImage(currentVideo, mediaX, mediaY);
-          } else if (isImage && currentImage) {
-            currentCtx.drawImage(currentImage, mediaX, mediaY);
-          }
-        }
-        currentCtx.restore();
-
-        // Draw the media with rounded corners (on top)
-        if (radiusValue > 0) {
-          currentCtx.save();
-          currentCtx.beginPath();
-          currentCtx.roundRect(mediaX, mediaY, mediaWidth, mediaHeight, radiusValue);
-          currentCtx.clip();
-          if (isVideo && currentVideo) {
-            currentCtx.drawImage(currentVideo, mediaX, mediaY);
-          } else if (isImage && currentImage) {
-            currentCtx.drawImage(currentImage, mediaX, mediaY);
-          }
-          currentCtx.restore();
-        } else {
-          if (isVideo && currentVideo) {
-            currentCtx.drawImage(currentVideo, mediaX, mediaY);
-          } else if (isImage && currentImage) {
-            currentCtx.drawImage(currentImage, mediaX, mediaY);
-          }
+            // Update UI
+            if (key === 'bgColor') {
+                document.getElementById('bgColorValue').textContent = value;
+            }
+            
+            // Redraw canvas if media is loaded
+            if (mediaFile) {
+                drawCanvas();
+            }
         }
 
-        currentAnimationFrame = requestAnimationFrame(renderLoop);
-      }
-      
-      renderLoop();
-    }
+        // Reset functions
+        function resetSceneSettings() {
+            settings.bgColor = defaultSettings.bgColor;
+            settings.cornerRadius = defaultSettings.cornerRadius;
+            settings.frameRatio = defaultSettings.frameRatio;
+            
+            // Update UI
+            document.getElementById('bgColor').value = settings.bgColor;
+            document.getElementById('bgColorValue').textContent = settings.bgColor;
+            document.getElementById('frameRatio').value = settings.frameRatio;
+            
+            updateSliderUI('cornerRadius', settings.cornerRadius, 0, 150);
+            
+            if (mediaFile) {
+                drawCanvas();
+            }
+        }
 
-    // Update range value displays and trigger re-render
-    document.getElementById('offsetX').addEventListener('input', function() {
-      document.getElementById('offsetXValue').textContent = this.value + 'px';
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        startRenderLoop();
-      }
-    });
-    
-    document.getElementById('offsetY').addEventListener('input', function() {
-      document.getElementById('offsetYValue').textContent = this.value + 'px';
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        startRenderLoop();
-      }
-    });
-    
-    document.getElementById('blur').addEventListener('input', function() {
-      document.getElementById('blurValue').textContent = this.value + 'px';
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        startRenderLoop();
-      }
-    });
-    
-    document.getElementById('transparency').addEventListener('input', function() {
-      document.getElementById('transparencyValue').textContent = this.value + '%';
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        startRenderLoop();
-      }
-    });
-    
-    document.getElementById('cornerRadius').addEventListener('input', function() {
-      document.getElementById('cornerRadiusValue').textContent = this.value + 'px';
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        startRenderLoop();
-      }
-    });
-    
-    // Frame ratio change handler
-    document.getElementById('frameRatio').addEventListener('change', function() {
-      const selectedOption = this.options[this.selectedIndex];
-      document.getElementById('frameRatioValue').textContent = selectedOption.text.split(' ')[0];
-      
-      if (currentCanvas && (currentVideo || currentImage)) {
-        updateCanvasDimensions();
-        if (currentAnimationFrame) {
-          cancelAnimationFrame(currentAnimationFrame);
-          startRenderLoop();
+        function resetShadowSettings() {
+            settings.offsetX = defaultSettings.offsetX;
+            settings.offsetY = defaultSettings.offsetY;
+            settings.blur = defaultSettings.blur;
+            settings.transparency = defaultSettings.transparency;
+            
+            updateSliderUI('offsetX', settings.offsetX, 0, 100);
+            updateSliderUI('offsetY', settings.offsetY, 0, 100);
+            updateSliderUI('blur', settings.blur, 1, 100);
+            updateSliderUI('transparency', settings.transparency, 10, 400);
+            
+            if (mediaFile) {
+                drawCanvas();
+            }
         }
-      }
-    });
-    
-    // Reset Scene Settings
-    document.getElementById('resetSceneBtn').addEventListener('click', function() {
-      // Reset background color
-      document.getElementById('bgColor').value = '#fafafa';
-      document.getElementById('colorValue').textContent = '#fafafa';
-      
-      // Reset corner radius
-      document.getElementById('cornerRadius').value = 46;
-      document.getElementById('cornerRadiusValue').textContent = '46px';
-      
-      // Reset frame ratio
-      document.getElementById('frameRatio').value = 'auto';
-      document.getElementById('frameRatioValue').textContent = 'Auto';
-      
-      // Update canvas dimensions and trigger re-render
-      if (currentCanvas && (currentVideo || currentImage)) {
-        updateCanvasDimensions();
-      }
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        startRenderLoop();
-      }
-    });
-    
-    // Reset Shadow Settings
-    document.getElementById('resetShadowBtn').addEventListener('click', function() {
-      // Reset shadow offset X
-      document.getElementById('offsetX').value = 0;
-      document.getElementById('offsetXValue').textContent = '0px';
-      
-      // Reset shadow offset Y
-      document.getElementById('offsetY').value = 15;
-      document.getElementById('offsetYValue').textContent = '15px';
-      
-      // Reset shadow blur
-      document.getElementById('blur').value = 60;
-      document.getElementById('blurValue').textContent = '60px';
-      
-      // Reset shadow transparency
-      document.getElementById('transparency').value = 20;
-      document.getElementById('transparencyValue').textContent = '20%';
-      
-      // Trigger re-render
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        startRenderLoop();
-      }
-    });
-    
-    // Update color value display and trigger re-render
-    document.getElementById('bgColor').addEventListener('input', function() {
-      // Ensure we always display hex format
-      const hexValue = this.value;
-      document.getElementById('colorValue').textContent = hexValue;
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        startRenderLoop();
-      }
-    });
-    
-    // Function to convert RGB to Hex if needed
-    function rgbToHex(r, g, b) {
-      return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
-    }
-    
-    // Function to update export button labels based on media type
-    function updateExportButtonLabels() {
-      const exportBtn = document.getElementById('exportBtn');
-      const exportMp4DirectBtn = document.getElementById('exportMp4DirectBtn');
-      
-      if (isVideo) {
-        exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
-        exportMp4DirectBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export MP4 (Direct)';
-      } else if (isImage) {
-        exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export PNG (Recommended)';
-        exportMp4DirectBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export JPEG';
-      }
-    }
-    
-    // Direct MP4 Export functionality - Improved real-time recording approach
-    function startDirectMp4Export() {
-      // If it's an image, use image export instead
-      if (isImage) {
-        exportImage('jpeg');
-        return;
-      }
-      
-      if (!currentVideo || !currentCanvas) return;
-      
-      // Show progress bar and hide buttons
-      const exportProgress = document.getElementById('exportProgress');
-      const exportMp4DirectBtn = document.getElementById('exportMp4DirectBtn');
-      const exportBtn = document.getElementById('exportBtn');
-      exportProgress.classList.remove('hidden');
-      exportMp4DirectBtn.style.display = 'none';
-      exportBtn.style.display = 'none';
-      
-      // Reset progress bar to 0%
-      document.getElementById('progressBar').style.width = '0%';
-      document.getElementById('progressText').textContent = '0%';
-      
-      // Create a dedicated export canvas with proper dimensions
-      const exportCanvas = document.createElement('canvas');
-      const exportCtx = exportCanvas.getContext('2d');
-      
-      // Set export canvas dimensions based on frame ratio
-      const frameRatio = document.getElementById('frameRatio').value;
-      const videoWidth = currentVideo.videoWidth;
-      const videoHeight = currentVideo.videoHeight;
-      const padding = 200;
-      
-      let exportCanvasWidth, exportCanvasHeight;
-      
-      if (frameRatio === 'auto') {
-        // Use video's natural ratio
-        exportCanvasWidth = videoWidth + padding;
-        exportCanvasHeight = videoHeight + padding;
-      } else {
-        // Parse the ratio (e.g., "16:9" -> 16/9)
-        const [widthRatio, heightRatio] = frameRatio.split(':').map(Number);
-        const targetRatio = widthRatio / heightRatio;
-        
-        // Calculate dimensions to fit the video within the target ratio
-        const videoRatio = videoWidth / videoHeight;
-        
-        if (videoRatio > targetRatio) {
-          // Video is wider than target ratio - fit to width
-          exportCanvasWidth = videoWidth + padding;
-          exportCanvasHeight = (videoWidth / targetRatio) + padding;
-        } else {
-          // Video is taller than target ratio - fit to height
-          exportCanvasHeight = videoHeight + padding;
-          exportCanvasWidth = (videoHeight * targetRatio) + padding;
-        }
-      }
-      
-      exportCanvas.width = exportCanvasWidth;
-      exportCanvas.height = exportCanvasHeight;
-      
-      // Create a dedicated export video element
-      const exportVideo = document.createElement('video');
-      exportVideo.src = currentVideo.src;
-      exportVideo.muted = true;
-      exportVideo.playsInline = true;
-      
-      // Function to render frame to export canvas
-      function renderExportFrame() {
-        const bgColor = document.getElementById('bgColor');
-        const offsetX = document.getElementById('offsetX');
-        const offsetY = document.getElementById('offsetY');
-        const blur = document.getElementById('blur');
-        const transparency = document.getElementById('transparency');
-        const cornerRadius = document.getElementById('cornerRadius');
-        
-        const bg = bgColor.value;
-        const ox = parseInt(offsetX.value);
-        const oy = parseInt(offsetY.value);
-        const blurValue = parseInt(blur.value);
-        const transparencyValue = parseInt(transparency.value) / 100;
-        const radiusValue = parseInt(cornerRadius.value);
 
-        // Calculate video position to center it in the export frame
-        const videoX = (exportCanvas.width - exportVideo.videoWidth) / 2;
-        const videoY = (exportCanvas.height - exportVideo.videoHeight) / 2;
+        // Slider functions
+        function updateSliderUI(sliderId, value, min, max) {
+            const percentage = Math.max(0, Math.min(100, ((value - min) / (max - min)) * 100));
+            const fill = document.getElementById(sliderId + 'Fill');
+            const thumb = document.getElementById(sliderId + 'Thumb');
+            const valueDisplay = document.getElementById(sliderId + 'Value');
+            
+            if (fill) {
+                fill.style.width = percentage + '%';
+                fill.style.minWidth = '0%';
+            }
+            if (thumb) {
+                thumb.style.left = percentage + '%';
+                thumb.style.minLeft = '0%';
+                thumb.style.maxLeft = '100%';
+            }
+            if (valueDisplay) {
+                const unit = sliderId === 'transparency' ? '%' : 'px';
+                valueDisplay.textContent = value + unit;
+            }
+            
+            settings[sliderId] = value;
+        }
 
-        // Clear export canvas with background color
-        exportCtx.fillStyle = bg;
-        exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
+        function handleSliderClick(event, sliderId, min, max) {
+            const rect = event.currentTarget.getBoundingClientRect();
+            const percentage = Math.max(0, Math.min(100, ((event.clientX - rect.left) / rect.width) * 100));
+            const value = Math.round(min + (percentage / 100) * (max - min));
+            
+            updateSliderUI(sliderId, value, min, max);
+            
+            if (mediaFile) {
+                drawCanvas();
+            }
+        }
 
-        // Create shadow effect with rounded corners
-        exportCtx.save();
-        exportCtx.shadowColor = `rgba(0, 0, 0, ${transparencyValue})`;
-        exportCtx.shadowBlur = blurValue;
-        exportCtx.shadowOffsetX = ox;
-        exportCtx.shadowOffsetY = oy;
-        
-        // Draw rounded rectangle for shadow
-        if (radiusValue > 0) {
-          exportCtx.beginPath();
-          exportCtx.roundRect(videoX, videoY, exportVideo.videoWidth, exportVideo.videoHeight, radiusValue);
-          exportCtx.fill();
-        } else {
-          exportCtx.drawImage(exportVideo, videoX, videoY);
+        function startDrag(event, sliderId, min, max) {
+            event.preventDefault();
+            event.stopPropagation();
+            isDragging = true;
+            currentSlider = { id: sliderId, min: min, max: max };
+            
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', stopDrag);
+            document.addEventListener('touchmove', handleDrag);
+            document.addEventListener('touchend', stopDrag);
         }
-        exportCtx.restore();
 
-        // Draw the video with rounded corners (on top)
-        if (radiusValue > 0) {
-          exportCtx.save();
-          exportCtx.beginPath();
-          exportCtx.roundRect(videoX, videoY, exportVideo.videoWidth, exportVideo.videoHeight, radiusValue);
-          exportCtx.clip();
-          exportCtx.drawImage(exportVideo, videoX, videoY);
-          exportCtx.restore();
-        } else {
-          exportCtx.drawImage(exportVideo, videoX, videoY);
+        function handleDrag(event) {
+            if (!isDragging || !currentSlider) return;
+            
+            const track = document.getElementById(currentSlider.id + 'Thumb').parentElement;
+            const rect = track.getBoundingClientRect();
+            const clientX = event.touches ? event.touches[0].clientX : event.clientX;
+            const percentage = Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+            const value = Math.round(currentSlider.min + (percentage / 100) * (currentSlider.max - currentSlider.min));
+            
+            updateSliderUI(currentSlider.id, value, currentSlider.min, currentSlider.max);
+            
+            if (mediaFile) {
+                drawCanvas();
+            }
         }
-      }
-      
-      // Set up the export render loop
-      let exportAnimationFrame = null;
-      function exportRenderLoop() {
-        renderExportFrame();
-        exportAnimationFrame = requestAnimationFrame(exportRenderLoop);
-      }
-      
-      // Start recording when video is ready
-      exportVideo.onloadeddata = function() {
-        // Set up MediaRecorder with the export canvas stream
-        const stream = exportCanvas.captureStream(30); // 30 FPS for smooth export
+
+        function stopDrag() {
+            isDragging = false;
+            currentSlider = null;
+            document.removeEventListener('mousemove', handleDrag);
+            document.removeEventListener('mouseup', stopDrag);
+            document.removeEventListener('touchmove', handleDrag);
+            document.removeEventListener('touchend', stopDrag);
+        }
+
+        // File upload handling
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            mediaFile = file;
+            mediaType = file.type.startsWith('image/') ? 'image' : 'video';
+            
+            // Save original filename without extension
+            originalFileName = file.name.replace(/\.[^/.]+$/, '');
+            
+            showLoading();
+            
+            const url = URL.createObjectURL(file);
+
+            if (mediaType === 'image') {
+                const img = document.getElementById('hiddenImage');
+                img.onload = () => {
+                    hideLoading();
+                    showCanvas();
+                    drawCanvas();
+                };
+                img.onerror = () => {
+                    hideLoading();
+                    alert('Error loading image. Please try a different file.');
+                };
+                img.src = url;
+            } else {
+                const video = document.getElementById('hiddenVideo');
+                video.onloadeddata = () => {
+                    hideLoading();
+                    showCanvas();
+                    drawCanvas();
+                    video.play(); // Start playing the video
+                };
+                video.onerror = () => {
+                    hideLoading();
+                    alert('Error loading video. Please try a different file.');
+                };
+                video.src = url;
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('hidden');
+        }
+
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('hidden');
+        }
+
+        function showCanvas() {
+            document.getElementById('uploadArea').classList.add('hidden');
+            document.getElementById('canvasContainer').classList.remove('hidden');
+            document.getElementById('exportCard').classList.remove('hidden');
+            document.getElementById('exportPngBtn').disabled = false;
+            document.getElementById('exportJpegBtn').disabled = false;
+            
+            // Start render loop for videos
+            if (mediaType === 'video') {
+                startRenderLoop();
+            }
+        }
         
-        // Try to use MP4 codec if available
-        let mimeType = 'video/mp4';
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/mp4;codecs=h264';
-        }
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm;codecs=h264';
-        }
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          // Fallback to WebM if MP4 is not supported
-          mimeType = 'video/webm;codecs=vp9';
+        // Render loop for videos
+        let renderLoop = null;
+        function startRenderLoop() {
+            if (renderLoop) {
+                cancelAnimationFrame(renderLoop);
+            }
+            
+            function render() {
+                if (mediaFile && mediaType === 'video') {
+                    drawCanvas();
+                    renderLoop = requestAnimationFrame(render);
+                }
+            }
+            
+            render();
         }
         
-        mediaRecorder = new MediaRecorder(stream, {
-          mimeType: mimeType,
-          videoBitsPerSecond: 3000000 // 3 Mbps for better quality
+        function stopRenderLoop() {
+            if (renderLoop) {
+                cancelAnimationFrame(renderLoop);
+                renderLoop = null;
+            }
+        }
+
+        // Canvas drawing
+        function calculateDimensions(mediaWidth, mediaHeight) {
+            const padding = 200; // Padding around the media (like the previous version)
+            
+            let canvasWidth, canvasHeight;
+            let mediaDisplayWidth, mediaDisplayHeight;
+            let mediaX, mediaY;
+
+            if (settings.frameRatio === 'auto') {
+                // Use media's natural dimensions with padding (like the previous version)
+                canvasWidth = mediaWidth + padding;
+                canvasHeight = mediaHeight + padding;
+                mediaDisplayWidth = mediaWidth;
+                mediaDisplayHeight = mediaHeight;
+            } else {
+                // Parse the ratio (e.g., "16:9" -> 16/9)
+                const [widthRatio, heightRatio] = settings.frameRatio.split(':').map(Number);
+                const targetRatio = widthRatio / heightRatio;
+                
+                // Calculate dimensions to fit the media within the target ratio
+                const mediaRatio = mediaWidth / mediaHeight;
+                
+                if (mediaRatio > targetRatio) {
+                    // Media is wider than target ratio - fit to width
+                    canvasWidth = mediaWidth + padding;
+                    canvasHeight = (mediaWidth / targetRatio) + padding;
+                } else {
+                    // Media is taller than target ratio - fit to height
+                    canvasHeight = mediaHeight + padding;
+                    canvasWidth = (mediaHeight * targetRatio) + padding;
+                }
+                
+                mediaDisplayWidth = mediaWidth;
+                mediaDisplayHeight = mediaHeight;
+            }
+
+            // Center the media within the canvas
+            mediaX = (canvasWidth - mediaDisplayWidth) / 2;
+            mediaY = (canvasHeight - mediaDisplayHeight) / 2;
+
+            return { canvasWidth, canvasHeight, mediaDisplayWidth, mediaDisplayHeight, mediaX, mediaY };
+        }
+
+        function drawCanvas() {
+            if (!mediaFile) return;
+
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+
+            let mediaElement;
+            let mediaWidth, mediaHeight;
+
+            if (mediaType === 'image') {
+                mediaElement = document.getElementById('hiddenImage');
+                mediaWidth = mediaElement.naturalWidth;
+                mediaHeight = mediaElement.naturalHeight;
+            } else {
+                mediaElement = document.getElementById('hiddenVideo');
+                mediaWidth = mediaElement.videoWidth;
+                mediaHeight = mediaElement.videoHeight;
+            }
+
+            if (mediaWidth === 0 || mediaHeight === 0) return;
+
+            const { canvasWidth, canvasHeight, mediaDisplayWidth, mediaDisplayHeight, mediaX, mediaY } = calculateDimensions(mediaWidth, mediaHeight);
+
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+
+            // Fill background
+            ctx.fillStyle = settings.bgColor;
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            // Draw shadow first
+            ctx.save();
+            ctx.shadowColor = `rgba(0, 0, 0, ${settings.transparency / 100})`;
+            ctx.shadowBlur = settings.blur;
+            ctx.shadowOffsetX = settings.offsetX;
+            ctx.shadowOffsetY = settings.offsetY;
+            
+            // Draw shadow as a filled rounded rectangle
+            const radius = settings.cornerRadius;
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // Light fill for shadow
+            ctx.roundRect(mediaX, mediaY, mediaDisplayWidth, mediaDisplayHeight, radius);
+            ctx.fill();
+            ctx.restore();
+
+            // Draw the media with rounded corners
+            ctx.save();
+            ctx.roundRect(mediaX, mediaY, mediaDisplayWidth, mediaDisplayHeight, radius);
+            ctx.clip();
+            ctx.drawImage(mediaElement, mediaX, mediaY, mediaDisplayWidth, mediaDisplayHeight);
+            ctx.restore();
+        }
+
+        // Export functionality
+        async function exportImage(format = 'png') {
+            const canvas = document.getElementById('canvas');
+            if (!canvas) return;
+
+            isExporting = true;
+            const progressContainer = document.getElementById('progressContainer');
+            const progressFill = document.getElementById('progressFill');
+            const progressValue = document.getElementById('progressValue');
+            const exportPngBtn = document.getElementById('exportPngBtn');
+            const exportJpegBtn = document.getElementById('exportJpegBtn');
+            
+            progressContainer.classList.remove('hidden');
+            exportPngBtn.disabled = true;
+            exportJpegBtn.disabled = true;
+            
+            // Simulate progress
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += 10;
+                if (progress >= 90) {
+                    clearInterval(progressInterval);
+                    progress = 90;
+                }
+                progressFill.style.width = progress + '%';
+                progressValue.textContent = progress + '%';
+            }, 100);
+
+            try {
+                const dataURL = canvas.toDataURL(`image/${format}`, 0.9);
+
+                const link = document.createElement('a');
+                const fileName = originalFileName ? `shot-formatted ${originalFileName}.${format}` : `shot-formatted.${format}`;
+                link.download = fileName;
+                link.href = dataURL;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                progressFill.style.width = '100%';
+                progressValue.textContent = '100%';
+                
+                setTimeout(() => {
+                    isExporting = false;
+                    progressContainer.classList.add('hidden');
+                    progressFill.style.width = '0%';
+                    progressValue.textContent = '0%';
+                    exportPngBtn.disabled = false;
+                    exportJpegBtn.disabled = false;
+                }, 1000);
+            } catch (error) {
+                console.error('Export failed:', error);
+                alert('Export failed. Please try again.');
+                isExporting = false;
+                progressContainer.classList.add('hidden');
+                exportPngBtn.disabled = false;
+                exportJpegBtn.disabled = false;
+            }
+
+            clearInterval(progressInterval);
+        }
+
+        // Initialize sliders on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            updateSliderUI('cornerRadius', settings.cornerRadius, 0, 150);
+            updateSliderUI('offsetX', settings.offsetX, 0, 100);
+            updateSliderUI('offsetY', settings.offsetY, 0, 100);
+            updateSliderUI('blur', settings.blur, 1, 100);
+            updateSliderUI('transparency', settings.transparency, 10, 400);
+
+            // Drag and drop functionality
+            const uploadArea = document.getElementById('uploadArea');
+            
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+                document.body.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight(e) {
+                uploadArea.style.borderColor = '#60a5fa';
+                uploadArea.style.backgroundColor = 'rgba(59, 130, 246, 0.05)';
+            }
+
+            function unhighlight(e) {
+                uploadArea.style.borderColor = '#1f2937';
+                uploadArea.style.backgroundColor = '#000000';
+            }
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                
+                if (files.length > 0) {
+                    const fileInput = document.getElementById('fileInput');
+                    // Create a new FileList-like object
+                    Object.defineProperty(fileInput, 'files', {
+                        value: files,
+                        writable: false,
+                    });
+                    handleFileUpload({ target: { files: files } });
+                }
+            }
         });
-        
-        recordedChunks = []; // Reset chunks for new export
-        
-        mediaRecorder.ondataavailable = function(event) {
-          if (event.data.size > 0) {
-            recordedChunks.push(event.data);
-          }
-        };
-        
-        mediaRecorder.onstop = function() {
-          // Stop the export render loop
-          if (exportAnimationFrame) {
-            cancelAnimationFrame(exportAnimationFrame);
-          }
-          
-          const fileExtension = mimeType.includes('mp4') ? 'mp4' : 'webm';
-          const blob = new Blob(recordedChunks, { type: mimeType });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          
-          // Get original filename and create new filename
-          const fileNameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
-          const newFileName = `Shot Formatted ${fileNameWithoutExt}.${fileExtension}`;
-          a.download = newFileName;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          
-          // Hide progress bar and show buttons
-          exportProgress.classList.add('hidden');
-          exportMp4DirectBtn.style.display = 'inline-block';
-          exportBtn.style.display = 'inline-block';
-          exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
-        };
-        
-        // Start recording and playing
-        mediaRecorder.start();
-        exportVideo.currentTime = 0;
-        exportVideo.play();
-        
-        // Start the export render loop
-        exportRenderLoop();
-        
-        // Set up progress tracking
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const timeRemaining = document.getElementById('timeRemaining');
-        const startTime = Date.now();
-        
-        function updateProgress() {
-          if (exportVideo.ended) {
-            mediaRecorder.stop();
-            return;
-          }
-          
-          const progress = (exportVideo.currentTime / exportVideo.duration) * 100;
-          progressBar.style.width = progress + '%';
-          progressText.textContent = Math.round(progress) + '%';
-          
-          // Calculate time remaining
-          const elapsed = Date.now() - startTime;
-          const estimatedTotal = elapsed / (progress / 100);
-          const remaining = estimatedTotal - elapsed;
-          
-          if (remaining > 0 && progress > 0) {
-            const minutes = Math.floor(remaining / 60000);
-            const seconds = Math.floor((remaining % 60000) / 1000);
-            timeRemaining.textContent = `${minutes}m ${seconds}s remaining`;
-          }
-          
-          // Continue updating progress
-          requestAnimationFrame(updateProgress);
-        }
-        
-        updateProgress();
-      };
-      
-      // Load the export video
-      exportVideo.load();
-    }
-    
-    // Image export functionality
-    function exportImage(format = 'png') {
-      if (!currentCanvas) return;
-      
-      // Create a temporary canvas for export with proper dimensions
-      const exportCanvas = document.createElement('canvas');
-      const exportCtx = exportCanvas.getContext('2d');
-      
-      // Set export canvas dimensions based on frame ratio
-      const frameRatio = document.getElementById('frameRatio').value;
-      let mediaWidth, mediaHeight;
-      
-      if (isVideo && currentVideo) {
-        mediaWidth = currentVideo.videoWidth;
-        mediaHeight = currentVideo.videoHeight;
-      } else if (isImage && currentImage) {
-        mediaWidth = currentImage.naturalWidth;
-        mediaHeight = currentImage.naturalHeight;
-      } else {
-        return;
-      }
-      
-      const padding = 200;
-      
-      let exportCanvasWidth, exportCanvasHeight;
-      
-      if (frameRatio === 'auto') {
-        // Use media's natural ratio
-        exportCanvasWidth = mediaWidth + padding;
-        exportCanvasHeight = mediaHeight + padding;
-      } else {
-        // Parse the ratio (e.g., "16:9" -> 16/9)
-        const [widthRatio, heightRatio] = frameRatio.split(':').map(Number);
-        const targetRatio = widthRatio / heightRatio;
-        
-        // Calculate dimensions to fit the media within the target ratio
-        const mediaRatio = mediaWidth / mediaHeight;
-        
-        if (mediaRatio > targetRatio) {
-          // Media is wider than target ratio - fit to width
-          exportCanvasWidth = mediaWidth + padding;
-          exportCanvasHeight = (mediaWidth / targetRatio) + padding;
-        } else {
-          // Media is taller than target ratio - fit to height
-          exportCanvasHeight = mediaHeight + padding;
-          exportCanvasWidth = (mediaHeight * targetRatio) + padding;
-        }
-      }
-      
-      exportCanvas.width = exportCanvasWidth;
-      exportCanvas.height = exportCanvasHeight;
-      
-      // Function to render frame to export canvas
-      function renderExportFrame() {
-        const bgColor = document.getElementById('bgColor');
-        const offsetX = document.getElementById('offsetX');
-        const offsetY = document.getElementById('offsetY');
-        const blur = document.getElementById('blur');
-        const transparency = document.getElementById('transparency');
-        const cornerRadius = document.getElementById('cornerRadius');
-        
-        const bg = bgColor.value;
-        const ox = parseInt(offsetX.value);
-        const oy = parseInt(offsetY.value);
-        const blurValue = parseInt(blur.value);
-        const transparencyValue = parseInt(transparency.value) / 100;
-        const radiusValue = parseInt(cornerRadius.value);
-
-        // Calculate media position to center it in the export frame
-        const mediaX = (exportCanvas.width - mediaWidth) / 2;
-        const mediaY = (exportCanvas.height - mediaHeight) / 2;
-
-        // Clear export canvas with background color
-        exportCtx.fillStyle = bg;
-        exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-
-        // Create shadow effect with rounded corners
-        exportCtx.save();
-        exportCtx.shadowColor = `rgba(0, 0, 0, ${transparencyValue})`;
-        exportCtx.shadowBlur = blurValue;
-        exportCtx.shadowOffsetX = ox;
-        exportCtx.shadowOffsetY = oy;
-        
-        // Draw rounded rectangle for shadow
-        if (radiusValue > 0) {
-          exportCtx.beginPath();
-          exportCtx.roundRect(mediaX, mediaY, mediaWidth, mediaHeight, radiusValue);
-          exportCtx.fill();
-        } else {
-          if (isVideo && currentVideo) {
-            exportCtx.drawImage(currentVideo, mediaX, mediaY);
-          } else if (isImage && currentImage) {
-            exportCtx.drawImage(currentImage, mediaX, mediaY);
-          }
-        }
-        exportCtx.restore();
-
-        // Draw the media with rounded corners (on top)
-        if (radiusValue > 0) {
-          exportCtx.save();
-          exportCtx.beginPath();
-          exportCtx.roundRect(mediaX, mediaY, mediaWidth, mediaHeight, radiusValue);
-          exportCtx.clip();
-          if (isVideo && currentVideo) {
-            exportCtx.drawImage(currentVideo, mediaX, mediaY);
-          } else if (isImage && currentImage) {
-            exportCtx.drawImage(currentImage, mediaX, mediaY);
-          }
-          exportCtx.restore();
-        } else {
-          if (isVideo && currentVideo) {
-            exportCtx.drawImage(currentVideo, mediaX, mediaY);
-          } else if (isImage && currentImage) {
-            exportCtx.drawImage(currentImage, mediaX, mediaY);
-          }
-        }
-      }
-      
-      // Render the frame
-      renderExportFrame();
-      
-      // Export the canvas
-      const mimeType = format === 'png' ? 'image/png' : 'image/jpeg';
-      const quality = format === 'png' ? 1.0 : 0.9;
-      
-      exportCanvas.toBlob(function(blob) {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        
-        // Get original filename and create new filename
-        const fileNameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
-        const newFileName = `Shot Formatted ${fileNameWithoutExt}.${format}`;
-        a.download = newFileName;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-      }, mimeType, quality);
-    }
-    
-    // Export functionality - Improved real-time recording approach
-    function startExport(isMp4Export = false) {
-      // If it's an image, use image export instead
-      if (isImage) {
-        exportImage(isMp4Export ? 'jpeg' : 'png');
-        return;
-      }
-      
-      if (!currentVideo || !currentCanvas) return;
-      
-      // Show progress bar and hide buttons
-      const exportProgress = document.getElementById('exportProgress');
-      const exportBtn = document.getElementById('exportBtn');
-      const exportMp4DirectBtn = document.getElementById('exportMp4DirectBtn');
-      exportProgress.classList.remove('hidden');
-      exportBtn.style.display = 'none';
-      exportMp4DirectBtn.style.display = 'none';
-      
-      // Reset progress bar to 0%
-      document.getElementById('progressBar').style.width = '0%';
-      document.getElementById('progressText').textContent = '0%';
-      
-      // Create a dedicated export canvas with proper dimensions
-      const exportCanvas = document.createElement('canvas');
-      const exportCtx = exportCanvas.getContext('2d');
-      
-      // Set export canvas dimensions based on frame ratio
-      const frameRatio = document.getElementById('frameRatio').value;
-      const videoWidth = currentVideo.videoWidth;
-      const videoHeight = currentVideo.videoHeight;
-      const padding = 200;
-      
-      let exportCanvasWidth, exportCanvasHeight;
-      
-      if (frameRatio === 'auto') {
-        // Use video's natural ratio
-        exportCanvasWidth = videoWidth + padding;
-        exportCanvasHeight = videoHeight + padding;
-      } else {
-        // Parse the ratio (e.g., "16:9" -> 16/9)
-        const [widthRatio, heightRatio] = frameRatio.split(':').map(Number);
-        const targetRatio = widthRatio / heightRatio;
-        
-        // Calculate dimensions to fit the video within the target ratio
-        const videoRatio = videoWidth / videoHeight;
-        
-        if (videoRatio > targetRatio) {
-          // Video is wider than target ratio - fit to width
-          exportCanvasWidth = videoWidth + padding;
-          exportCanvasHeight = (videoWidth / targetRatio) + padding;
-        } else {
-          // Video is taller than target ratio - fit to height
-          exportCanvasHeight = videoHeight + padding;
-          exportCanvasWidth = (videoHeight * targetRatio) + padding;
-        }
-      }
-      
-      exportCanvas.width = exportCanvasWidth;
-      exportCanvas.height = exportCanvasHeight;
-      
-      // Create a dedicated export video element
-      const exportVideo = document.createElement('video');
-      exportVideo.src = currentVideo.src;
-      exportVideo.muted = true;
-      exportVideo.playsInline = true;
-      
-      // Function to render frame to export canvas
-      function renderExportFrame() {
-        const bgColor = document.getElementById('bgColor');
-        const offsetX = document.getElementById('offsetX');
-        const offsetY = document.getElementById('offsetY');
-        const blur = document.getElementById('blur');
-        const transparency = document.getElementById('transparency');
-        const cornerRadius = document.getElementById('cornerRadius');
-        
-        const bg = bgColor.value;
-        const ox = parseInt(offsetX.value);
-        const oy = parseInt(offsetY.value);
-        const blurValue = parseInt(blur.value);
-        const transparencyValue = parseInt(transparency.value) / 100;
-        const radiusValue = parseInt(cornerRadius.value);
-
-        // Calculate video position to center it in the export frame
-        const videoX = (exportCanvas.width - exportVideo.videoWidth) / 2;
-        const videoY = (exportCanvas.height - exportVideo.videoHeight) / 2;
-
-        // Clear export canvas with background color
-        exportCtx.fillStyle = bg;
-        exportCtx.fillRect(0, 0, exportCanvas.width, exportCanvas.height);
-
-        // Create shadow effect with rounded corners
-        exportCtx.save();
-        exportCtx.shadowColor = `rgba(0, 0, 0, ${transparencyValue})`;
-        exportCtx.shadowBlur = blurValue;
-        exportCtx.shadowOffsetX = ox;
-        exportCtx.shadowOffsetY = oy;
-        
-        // Draw rounded rectangle for shadow
-        if (radiusValue > 0) {
-          exportCtx.beginPath();
-          exportCtx.roundRect(videoX, videoY, exportVideo.videoWidth, exportVideo.videoHeight, radiusValue);
-          exportCtx.fill();
-        } else {
-          exportCtx.drawImage(exportVideo, videoX, videoY);
-        }
-        exportCtx.restore();
-
-        // Draw the video with rounded corners (on top)
-        if (radiusValue > 0) {
-          exportCtx.save();
-          exportCtx.beginPath();
-          exportCtx.roundRect(videoX, videoY, exportVideo.videoWidth, exportVideo.videoHeight, radiusValue);
-          exportCtx.clip();
-          exportCtx.drawImage(exportVideo, videoX, videoY);
-          exportCtx.restore();
-        } else {
-          exportCtx.drawImage(exportVideo, videoX, videoY);
-        }
-      }
-      
-      // Set up the export render loop
-      let exportAnimationFrame = null;
-      function exportRenderLoop() {
-        renderExportFrame();
-        exportAnimationFrame = requestAnimationFrame(exportRenderLoop);
-      }
-      
-      // Start recording when video is ready
-      exportVideo.onloadeddata = function() {
-        // Set up MediaRecorder with the export canvas stream
-        const stream = exportCanvas.captureStream(30); // 30 FPS for smooth export
-        
-        // Try to use higher quality codec if available
-        let mimeType = 'video/webm;codecs=vp9';
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm;codecs=vp8';
-        }
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = 'video/webm';
-        }
-        
-        mediaRecorder = new MediaRecorder(stream, {
-          mimeType: mimeType,
-          videoBitsPerSecond: 3000000 // 3 Mbps for better quality
-        });
-        
-        recordedChunks = []; // Reset chunks for new export
-        
-        mediaRecorder.ondataavailable = function(event) {
-          if (event.data.size > 0) {
-            recordedChunks.push(event.data);
-          }
-        };
-        
-        mediaRecorder.onstop = function() {
-          // Stop the export render loop
-          if (exportAnimationFrame) {
-            cancelAnimationFrame(exportAnimationFrame);
-          }
-          
-          const blob = new Blob(recordedChunks, { type: 'video/webm' });
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          
-          // Get original filename and create new filename
-          const fileNameWithoutExt = originalFileName.substring(0, originalFileName.lastIndexOf('.'));
-          const newFileName = `Shot Formatted ${fileNameWithoutExt}.webm`;
-          a.download = newFileName;
-          document.body.appendChild(a);
-          a.click();
-          document.body.removeChild(a);
-          URL.revokeObjectURL(url);
-          
-          // Hide progress bar and show buttons
-          exportProgress.classList.add('hidden');
-          exportBtn.style.display = 'inline-block';
-          exportMp4DirectBtn.style.display = 'inline-block';
-          exportBtn.innerHTML = '<i class="fas fa-download mr-2"></i>Export WebM (Recommended)';
-          
-          // If this was an MP4 export, open CloudConvert after download
-          if (isMp4Export) {
-            setTimeout(() => {
-              window.open('https://cloudconvert.com/webm-to-mp4', '_blank');
-            }, 1000);
-          }
-        };
-        
-        // Start recording and playing
-        mediaRecorder.start();
-        exportVideo.currentTime = 0;
-        exportVideo.play();
-        
-        // Start the export render loop
-        exportRenderLoop();
-        
-        // Set up progress tracking
-        const progressBar = document.getElementById('progressBar');
-        const progressText = document.getElementById('progressText');
-        const timeRemaining = document.getElementById('timeRemaining');
-        const startTime = Date.now();
-        
-        function updateProgress() {
-          if (exportVideo.ended) {
-            mediaRecorder.stop();
-            return;
-          }
-          
-          const progress = (exportVideo.currentTime / exportVideo.duration) * 100;
-          progressBar.style.width = progress + '%';
-          progressText.textContent = Math.round(progress) + '%';
-          
-          // Calculate time remaining
-          const elapsed = Date.now() - startTime;
-          const estimatedTotal = elapsed / (progress / 100);
-          const remaining = estimatedTotal - elapsed;
-          
-          if (remaining > 0 && progress > 0) {
-            const minutes = Math.floor(remaining / 60000);
-            const seconds = Math.floor((remaining % 60000) / 1000);
-            timeRemaining.textContent = `${minutes}m ${seconds}s remaining`;
-          }
-          
-          // Continue updating progress
-          requestAnimationFrame(updateProgress);
-        }
-        
-        updateProgress();
-      };
-      
-      // Load the export video
-      exportVideo.load();
-    }
-    
-    // WebM Export button
-    document.getElementById('exportBtn').addEventListener('click', function() {
-      startExport(false);
-    });
-    
-
-    
-    // Direct MP4 Export button
-    document.getElementById('exportMp4DirectBtn').addEventListener('click', function() {
-      startDirectMp4Export();
-    });
-    
-    // File input label update and auto-render
-    document.getElementById('mediaInput').addEventListener('change', function() {
-      const label = document.querySelector('.file-input-label');
-      if (this.files.length > 0) {
-        const file = this.files[0];
-        label.innerHTML = '<i class="fas fa-check mr-2"></i>' + file.name;
-        label.style.background = '#10b981';
-        
-        // Store original filename
-        originalFileName = file.name;
-        
-        // Reset media type flags
-        isVideo = false;
-        isImage = false;
-        
-        // Determine if file is video or image
-        if (file.type.startsWith('video/')) {
-          isVideo = true;
-          handleVideoFile(file);
-        } else if (file.type.startsWith('image/')) {
-          isImage = true;
-          handleImageFile(file);
-        } else {
-          alert('Please select a valid video or image file.');
-          return;
-        }
-      } else {
-        label.innerHTML = '<i class="fas fa-cloud-upload-alt mr-2"></i>Choose Media File';
-        label.style.background = '#000000';
-        
-        // Show placeholder and hide canvas when file is removed
-        const placeholder = document.getElementById('previewPlaceholder');
-        const canvas = document.getElementById('canvas');
-        const exportBtn = document.getElementById('exportBtn');
-        const exportMp4DirectBtn = document.getElementById('exportMp4DirectBtn');
-        const exportSection = document.querySelector('#exportBtn').closest('.mb-8');
-        if (placeholder) {
-          placeholder.style.display = 'flex';
-        }
-        if (canvas) {
-          canvas.style.display = 'none';
-        }
-        if (exportBtn) {
-          exportBtn.style.display = 'none';
-        }
-        if (exportMp4DirectBtn) {
-          exportMp4DirectBtn.style.display = 'none';
-        }
-        if (exportSection) {
-          exportSection.style.display = 'none';
-        }
-        
-        // Stop any ongoing animation
-        if (currentAnimationFrame) {
-          cancelAnimationFrame(currentAnimationFrame);
-          currentAnimationFrame = null;
-        }
-      }
-    });
-    
-    // Handle video file
-    function handleVideoFile(file) {
-      // Stop any existing render loop
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        currentAnimationFrame = null;
-      }
-      
-      const video = document.getElementById('video');
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      // Clear the canvas immediately
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Reset image variable and set video variable
-      currentImage = null;
-      currentVideo = video;
-      currentCanvas = canvas;
-      currentCtx = ctx;
-      
-      const url = URL.createObjectURL(file);
-      video.src = url;
-      video.load();
-
-      video.onloadeddata = () => {
-        // Update canvas dimensions based on frame ratio
-        updateCanvasDimensions();
-        
-        canvas.style.display = 'block';
-        
-        // Hide the placeholder when video starts rendering
-        const placeholder = document.getElementById('previewPlaceholder');
-        if (placeholder) {
-          placeholder.style.display = 'none';
-        }
-        
-        // Show export section and update button labels
-        const exportBtn = document.getElementById('exportBtn');
-        const exportMp4DirectBtn = document.getElementById('exportMp4DirectBtn');
-        const exportSection = document.querySelector('#exportBtn').closest('.mb-8');
-        if (exportBtn) {
-          exportBtn.style.display = 'inline-block';
-        }
-        if (exportMp4DirectBtn) {
-          exportMp4DirectBtn.style.display = 'inline-block';
-        }
-        if (exportSection) {
-          exportSection.style.display = 'block';
-        }
-        
-        // Update export button labels
-        updateExportButtonLabels();
-        
-        video.play();
-        
-        // Start render loop
-        startRenderLoop();
-      };
-    }
-    
-    // Handle image file
-    function handleImageFile(file) {
-      // Stop any existing render loop
-      if (currentAnimationFrame) {
-        cancelAnimationFrame(currentAnimationFrame);
-        currentAnimationFrame = null;
-      }
-      
-      const image = document.getElementById('image');
-      const canvas = document.getElementById('canvas');
-      const ctx = canvas.getContext('2d');
-      
-      // Clear the canvas immediately
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      
-      // Reset video variable and set image variable
-      currentVideo = null;
-      currentImage = image;
-      currentCanvas = canvas;
-      currentCtx = ctx;
-      
-      const url = URL.createObjectURL(file);
-      image.src = url;
-      
-      image.onload = () => {
-        // Update canvas dimensions based on frame ratio
-        updateCanvasDimensions();
-        
-        canvas.style.display = 'block';
-        
-        // Hide the placeholder when image starts rendering
-        const placeholder = document.getElementById('previewPlaceholder');
-        if (placeholder) {
-          placeholder.style.display = 'none';
-        }
-        
-        // Show export section and update button labels
-        const exportBtn = document.getElementById('exportBtn');
-        const exportMp4DirectBtn = document.getElementById('exportMp4DirectBtn');
-        const exportSection = document.querySelector('#exportBtn').closest('.mb-8');
-        if (exportBtn) {
-          exportBtn.style.display = 'inline-block';
-        }
-        if (exportMp4DirectBtn) {
-          exportMp4DirectBtn.style.display = 'inline-block';
-        }
-        if (exportSection) {
-          exportSection.style.display = 'block';
-        }
-        
-        // Update export button labels
-        updateExportButtonLabels();
-        
-        // Start render loop
-        startRenderLoop();
-      };
-    }
-  </script>
+    </script>
 </body>
 </html>
